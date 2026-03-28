@@ -78,10 +78,8 @@ def py_generate_spec(c1_atom, c2_atom):
             generated_context = None
 
         if generated_context:
-            print(c1_atom, c2_atom)
             concept1_name=str(c1_atom).split()[0].replace('(', '')
             concept2_name=str(c2_atom).split()[0].replace('(', '')
-            print(concept1_name, concept2_name)
             
             result = prompt_agent(
                 metta_parser,
@@ -97,7 +95,6 @@ def py_generate_spec(c1_atom, c2_atom):
                 c1_atom,
                 c2_atom,
                 generated_context
-
             )
         # Log Success
         monitor.log_llm_attempt(success=True)
