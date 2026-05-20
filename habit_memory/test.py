@@ -26,5 +26,16 @@ def main():
     m_p_entrenched = memory_bank.get_habit_strength("intelligence", "tools")
     m_p_novel = memory_bank.get_habit_strength("intelligence", "climbing")
     
+    print(f"M_P('intelligence', 'tools'): {m_p_entrenched:.4f} (High Habit Fluency)")
+    print(f"M_P('intelligence', 'climbing'): {m_p_novel:.4f} (Zero Habit / Novelty Option)")
+
+    # 4. KR 3: Evaluate Candidates
+    candidate_A = {"intelligence", "climbing", "agility"} 
+    candidate_B = {"intelligence", "webs"}
+
+    print("\n--- STEP 3: Evaluating Blend Candidates (Habit Bonus Scores) ---")
+    print(f"Candidate A {candidate_A} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_A):.4f}")
+    print(f"Candidate B {candidate_B} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_B):.4f}")
+
 if __name__ == "__main__":
     main()
