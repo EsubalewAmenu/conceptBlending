@@ -37,5 +37,17 @@ def main():
     print(f"Candidate A {candidate_A} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_A):.4f}")
     print(f"Candidate B {candidate_B} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_B):.4f}")
 
+    # 5. KR 4: Select and Reinforce Non-Dominated Winner Blend
+    print("\n--- STEP 4: Simulating Pareto Front Choice & Reinforcement ---")
+    winner_blend = candidate_A
+    print(f"Updating long-term memory with winner: {winner_blend}")
+    memory_bank.register_successful_blend(winner_blend)
+
+    # 6. Verify Updated Structural State
+    print("\n--- STEP 5: Verifying Real-Time System Habit Updates ---")
+    updated_m_p = memory_bank.get_habit_strength("intelligence", "climbing")
+    print(f"New Strength Score M_P('intelligence', 'climbing'): {updated_m_p:.4f}")
+    print("The code execution loop has successfully registered a new blending habit!")
+
 if __name__ == "__main__":
     main()
