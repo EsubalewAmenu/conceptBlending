@@ -1,10 +1,17 @@
+# main.py
 from historic_habit_memory import HabitMemory
 
 def main():
-    # 1. Initialize the modular system (KR 5)
+
+    concept_1_spider = {"climbing", "webs", "venomous"}
+    concept_2_man    = {"intelligence", "tools", "walking"}
+    
+    print("--- STEP 1: Initial Source Concepts Declared ---")
+    print(f"Concept 1 (Spider) Properties: {concept_1_spider}")
+    print(f"Concept 2 (Man)    Properties: {concept_2_man}\n")
+
     memory_bank = HabitMemory()
 
-    # 2. Hardcode Static Historical Experience baseline
     static_history = [
         {"intelligence", "tools", "language"},
         {"intelligence", "tools", "strategy"},
@@ -16,38 +23,58 @@ def main():
         {"webs", "insects", "sticky"}
     ]
     
-    print("--- STEP 1: Seeding Static Historical Memory Bank ---")
+    print("--- STEP 2: Seeding Static Historical Memory Bank ---")
     for historical_blend in static_history:
         memory_bank.register_successful_blend(historical_blend)
-    print(f"Total historical entries processed into archive: {memory_bank.total_blends_processed}\n")
+    print(f"Historical database loaded. Total entries: {memory_bank.total_blends_processed}\n")
 
-    # 3. Property Pair Comparison Queries
-    print("--- STEP 2: Querying Specific Property Pair Habit Strengths ---")
-    m_p_entrenched = memory_bank.get_habit_strength("intelligence", "tools")
-    m_p_novel = memory_bank.get_habit_strength("intelligence", "climbing")
+    # -----------------------------------------------------------------
+    # STEP 3: CHECK PAST HISTORY USING SOURCE CONCEPT PROPERTIES
+    # -----------------------------------------------------------------
+    # We grab specific properties directly out of our Step 1 declarations
+    prop_from_man = list(concept_2_man)[0]     # "intelligence"
+    prop_from_spider_1 = list(concept_1_spider)[0] # "climbing"
+    prop_from_spider_2 = list(concept_1_spider)[1] # "webs"
+
+    print("--- STEP 3: Checking Past History Strengths Between Sources ---")
+    m_p_climb_intel = memory_bank.get_habit_strength(prop_from_spider_1, prop_from_man)
+    m_p_webs_intel = memory_bank.get_habit_strength(prop_from_spider_2, prop_from_man)
     
-    print(f"M_P('intelligence', 'tools'): {m_p_entrenched:.4f} (High Habit Fluency)")
-    print(f"M_P('intelligence', 'climbing'): {m_p_novel:.4f} (Zero Habit / Novelty Option)")
+    print(f"Cross-Domain Pair Check M_P('{prop_from_spider_1}', '{prop_from_man}'): {m_p_climb_intel:.4f}")
+    print(f"Cross-Domain Pair Check M_P('{prop_from_spider_2}', '{prop_from_man}'): {m_p_webs_intel:.4f}")
+    print("Result Interpretation: History returns 0.00. These sources are completely unassociated.\n")
 
-    # 4. KR 3: Evaluate Candidates
-    candidate_A = {"intelligence", "climbing", "agility"} 
-    candidate_B = {"intelligence", "webs"}
+    # -----------------------------------------------------------------
+    # STEP 4: EVALUATE COMPETING BLEND CANDIDATES (KR 3)
+    # -----------------------------------------------------------------
+    # Candidate A uses Category-Theoretic structural framing to extract background traits ('agility')
+    # Candidate B is a superficial property mashup
+    candidate_A = {prop_from_man, prop_from_spider_1, "agility"} # {"intelligence", "climbing", "agility"}
+    candidate_B = {prop_from_man, prop_from_spider_2}            # {"intelligence", "webs"}
 
-    print("\n--- STEP 3: Evaluating Blend Candidates (Habit Bonus Scores) ---")
-    print(f"Candidate A {candidate_A} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_A):.4f}")
-    print(f"Candidate B {candidate_B} -> Bonus Score: {memory_bank.calculate_blend_habit_bonus(candidate_B):.4f}")
+    print("--- STEP 4: Evaluating Generated Blend Candidates ---")
+    bonus_A = memory_bank.calculate_blend_habit_bonus(candidate_A)
+    bonus_B = memory_bank.calculate_blend_habit_bonus(candidate_B)
+    
+    print(f"Candidate Blend A {candidate_A} -> Habit Bonus Score: {bonus_A:.4f}")
+    print(f"Candidate Blend B {candidate_B} -> Habit Bonus Score: {bonus_B:.4f}\n")
 
-    # 5. KR 4: Select and Reinforce Non-Dominated Winner Blend
-    print("\n--- STEP 4: Simulating Pareto Front Choice & Reinforcement ---")
+    # -----------------------------------------------------------------
+    # STEP 5: SELECT WINNER & REINFORCE MEMORY LOOPS (KR 4)
+    # -----------------------------------------------------------------
+    # Candidate A wins because it preserves structural coherence and internal habit fluency (climbing + agility)
+    print("--- STEP 5: Simulating Pareto Front Choice & Habit Formation ---")
     winner_blend = candidate_A
-    print(f"Updating long-term memory with winner: {winner_blend}")
+    print(f"Crowning Winner Selection: {winner_blend}")
+    
+    # Reinforcing the network architecture
     memory_bank.register_successful_blend(winner_blend)
 
-    # 6. Verify Updated Structural State
-    print("\n--- STEP 5: Verifying Real-Time System Habit Updates ---")
-    updated_m_p = memory_bank.get_habit_strength("intelligence", "climbing")
-    print(f"New Strength Score M_P('intelligence', 'climbing'): {updated_m_p:.4f}")
-    print("The code execution loop has successfully registered a new blending habit!")
+    # Re-checking the updated baseline to verify real-time modification
+    updated_m_p = memory_bank.get_habit_strength(prop_from_spider_1, prop_from_man)
+    print(f"Recalculated Strength M_P('{prop_from_spider_1}', '{prop_from_man}'): {updated_m_p:.4f}")
+    print("Success: System long-term memory updated. The breakthrough concept is now a habit.")
+    print("=============================================================")
 
 if __name__ == "__main__":
     main()
