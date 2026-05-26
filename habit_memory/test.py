@@ -1,15 +1,17 @@
-# main.py
+import itertools
 from historic_habit_memory import HabitMemory
 
 def main():
 
-    concept_1_spider = {"climbing", "webs", "venomous"}
-    concept_2_man    = {"intelligence", "tools", "walking"}
+    # concept_1 is spider properties, concept_2 is human properties
+    concept_1 = {"climbing", "webs", "venomous"}
+    concept_2 = {"intelligence", "tools", "walking"}
     
     print("--- STEP 1: Initial Source Concepts Declared ---")
-    print(f"Concept 1 (Spider) Properties: {concept_1_spider}")
-    print(f"Concept 2 (Man)    Properties: {concept_2_man}\n")
+    print(f"Concept 1 Properties: {concept_1}")
+    print(f"Concept 2 Properties: {concept_2}\n")
 
+    # past habit history - just for test
     memory_bank = HabitMemory()
 
     static_history = [
@@ -28,52 +30,66 @@ def main():
         memory_bank.register_successful_blend(historical_blend)
     print(f"Historical database loaded. Total entries: {memory_bank.total_blends_processed}\n")
 
-    # -----------------------------------------------------------------
-    # STEP 3: CHECK PAST HISTORY USING SOURCE CONCEPT PROPERTIES
-    # -----------------------------------------------------------------
-    # We grab specific properties directly out of our Step 1 declarations
-    prop_from_man = list(concept_2_man)[0]     # "intelligence"
-    prop_from_spider_1 = list(concept_1_spider)[0] # "climbing"
-    prop_from_spider_2 = list(concept_1_spider)[1] # "webs"
+    # past history strength between core properties
+    print("--- STEP 3: Automated Past History Cross-Examination ---")
+    cross_connections_found = False
+    for prop_a in concept_1:
+        for prop_b in concept_2:
+            strength = memory_bank.get_habit_strength(prop_a, prop_b)
+            if strength > 0:
+                print(f"  Established Connection: M_P('{prop_a}', '{prop_b}') = {strength:.4f}")
+                cross_connections_found = True
+                
+    if not cross_connections_found:
+        print("  Notice: No direct historical habits exist between these two domains.")
+    print("\n")
 
-    print("--- STEP 3: Checking Past History Strengths Between Sources ---")
-    m_p_climb_intel = memory_bank.get_habit_strength(prop_from_spider_1, prop_from_man)
-    m_p_webs_intel = memory_bank.get_habit_strength(prop_from_spider_2, prop_from_man)
+    #candidate generation and evaluation
+    print("--- STEP 4: Algorithmic Candidate Generation & Evaluation ---")
     
-    print(f"Cross-Domain Pair Check M_P('{prop_from_spider_1}', '{prop_from_man}'): {m_p_climb_intel:.4f}")
-    print(f"Cross-Domain Pair Check M_P('{prop_from_spider_2}', '{prop_from_man}'): {m_p_webs_intel:.4f}")
-    print("Result Interpretation: History returns 0.00. These sources are completely unassociated.\n")
-
-    # -----------------------------------------------------------------
-    # STEP 4: EVALUATE COMPETING BLEND CANDIDATES (KR 3)
-    # -----------------------------------------------------------------
-    # Candidate A uses Category-Theoretic structural framing to extract background traits ('agility')
-    # Candidate B is a superficial property mashup
-    candidate_A = {prop_from_man, prop_from_spider_1, "agility"} # {"intelligence", "climbing", "agility"}
-    candidate_B = {prop_from_man, prop_from_spider_2}            # {"intelligence", "webs"}
-
-    print("--- STEP 4: Evaluating Generated Blend Candidates ---")
-    bonus_A = memory_bank.calculate_blend_habit_bonus(candidate_A)
-    bonus_B = memory_bank.calculate_blend_habit_bonus(candidate_B)
+    # pick the top/first available property from each concept
+    dynamic_prop_1 = sorted(list(concept_1))[0]
+    dynamic_prop_2 = sorted(list(concept_2))[0]
     
-    print(f"Candidate Blend A {candidate_A} -> Habit Bonus Score: {bonus_A:.4f}")
-    print(f"Candidate Blend B {candidate_B} -> Habit Bonus Score: {bonus_B:.4f}\n")
-
-    # -----------------------------------------------------------------
-    # STEP 5: SELECT WINNER & REINFORCE MEMORY LOOPS (KR 4)
-    # -----------------------------------------------------------------
-    # Candidate A wins because it preserves structural coherence and internal habit fluency (climbing + agility)
-    print("--- STEP 5: Simulating Pareto Front Choice & Habit Formation ---")
-    winner_blend = candidate_A
-    print(f"Crowning Winner Selection: {winner_blend}")
+    generated_core_blend = {dynamic_prop_1, dynamic_prop_2}
+    print(f"  [Search Engine] Automatically selected core pairing: {generated_core_blend}")
     
-    # Reinforcing the network architecture
+    # Scan memory to find background traits strongly tied to our selected core
+    discovered_extensions = set()
+    for prop in generated_core_blend:
+        for historical_prop in memory_bank.property_counts.keys():
+            if historical_prop not in generated_core_blend:
+                habit_link = memory_bank.get_habit_strength(prop, historical_prop)
+                if habit_link >= 0.5:  # Evaluation threshold from Section 6
+                    discovered_extensions.add(historical_prop)
+                    print(f"  [Colimit Discovery] Found background trait '{historical_prop}' "
+                          f"strongly linked to core trait '{prop}' (M_P = {habit_link:.2f})")
+
+    # build the competing candidate spaces
+    blend_candidate_1 = generated_core_blend.copy()
+    blend_candidate_2 = generated_core_blend.union(discovered_extensions)
+
+    # calculate the Peircean Quality (Habit Bonus / Equation 43)
+    bonus_1 = memory_bank.calculate_blend_habit_bonus(blend_candidate_1)
+    bonus_2 = memory_bank.calculate_blend_habit_bonus(blend_candidate_2)
+    
+    print(f"\n  Evaluating Generated Options:")
+    print(f"    Candidate 1 (Basic Core) {blend_candidate_1} -> Habit Bonus: {bonus_1:.4f}")
+    print(f"    Candidate 2 (Expanded)   {blend_candidate_2} -> Habit Bonus: {bonus_2:.4f}\n")
+
+    # select winner based on superior habit fluency and reinforce memory with the winning blend
+    print("--- STEP 5: Pareto Optimization Choice & Habit Formation ---")
+    
+    # The system automatically crowns the winner with the superior habit fluency
+    winner_blend = blend_candidate_2 if bonus_2 > bonus_1 else blend_candidate_1
+    print(f"  Crowning Winner Selection: {winner_blend}")
+    
+    # Reinforcing the long-term memory network
     memory_bank.register_successful_blend(winner_blend)
 
-    # Re-checking the updated baseline to verify real-time modification
-    updated_m_p = memory_bank.get_habit_strength(prop_from_spider_1, prop_from_man)
-    print(f"Recalculated Strength M_P('{prop_from_spider_1}', '{prop_from_man}'): {updated_m_p:.4f}")
-    print("Success: System long-term memory updated. The breakthrough concept is now a habit.")
+    # Re-verify the updated cross-domain state to confirm the system learned dynamically
+    updated_m_p = memory_bank.get_habit_strength(dynamic_prop_1, dynamic_prop_2)
+    print(f"  Updated Cross-Domain Habit M_P('{dynamic_prop_1}', '{dynamic_prop_2}'): {updated_m_p:.4f}")
     print("=============================================================")
 
 if __name__ == "__main__":
