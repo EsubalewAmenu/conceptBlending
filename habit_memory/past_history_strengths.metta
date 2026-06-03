@@ -1,7 +1,5 @@
 (= (hide $value) (empty))
 
-!(hide (import! &self memory))
-
 (= (list-length ())
    0)
 (= (list-length (cons $head $tail))
