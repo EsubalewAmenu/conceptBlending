@@ -1,7 +1,7 @@
 (= (hide $value) (empty))
 
-!(let $import-memory (import! &self memory) (empty))
-!(let $import-step-3 (import! &self past_history_strengths) (empty))
+!(let $import-memory (import! &self ../memory) (empty))
+!(let $import-step-3 (import! &self ../past_history_strengths) (empty))
 
 !(test (property-count intelligence) 4)
 !(test (property-count climbing) 3)

@@ -1,8 +1,8 @@
 (= (hide $value) (empty))
 
-!(let $import-memory (import! &self memory) (empty))
-!(let $import-step-3 (import! &self past_history_strengths) (empty))
-!(let $import-step-4 (import! &self candidate_generation) (empty))
+!(let $import-memory (import! &self ../memory) (empty))
+!(let $import-step-3 (import! &self ../past_history_strengths) (empty))
+!(let $import-step-4 (import! &self ../candidate_generation) (empty))
 
 !(test (first-sorted-property (climbing webs venomous)) climbing)
 !(test (first-sorted-property (intelligence tools walking)) intelligence)
