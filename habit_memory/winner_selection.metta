@@ -5,7 +5,10 @@
        $candidate-2
        $candidate-1))
 
-(= (select-and-reinforce-winner
+(= (persist-selected-blend! $winner-blend)
+   (py-call (persist_memory.persist_blend $winner-blend)))
+
+(= (select-and-reinforce-winner-runtime
       $memory
       (candidate-result $candidate-1 $bonus-1 $candidate-2 $bonus-2)
       $concept-1
@@ -19,3 +22,17 @@
           ($updated-m-p (get-habit-strength $updated-memory $dynamic-prop-1 $dynamic-prop-2))
           ($show-updated (println! (Updated Cross-Domain Habit M_P $dynamic-prop-1 $dynamic-prop-2 : $updated-m-p))))
       (selection-result $winner-blend $updated-memory)))
+
+(= (select-and-reinforce-winner
+      $memory
+      (candidate-result $candidate-1 $bonus-1 $candidate-2 $bonus-2)
+      $concept-1
+      $concept-2)
+   (let* (($result (select-and-reinforce-winner-runtime
+                      $memory
+                      (candidate-result $candidate-1 $bonus-1 $candidate-2 $bonus-2)
+                      $concept-1
+                      $concept-2))
+          ($winner-blend (let (selection-result $winner $updated-memory) $result $winner))
+          ($persisted (persist-selected-blend! $winner-blend)))
+      $result))

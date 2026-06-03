@@ -1,4 +1,4 @@
-; Step 3 orchestration: cross-domain habit-strength inspection.
+; Step 3 orchestration: cross-domain habit-strength inspection
 
 (= (default-habit-memory)
    (memory-from-imported-history))

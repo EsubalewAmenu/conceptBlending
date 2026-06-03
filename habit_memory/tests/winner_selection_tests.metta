@@ -21,7 +21,7 @@
           intelligence)
        0.125)
 
-!(test (select-and-reinforce-winner
+!(test (select-and-reinforce-winner-runtime
           (memory-from-imported-history)
           (candidate-result (climbing intelligence) 0.0 (climbing intelligence agility tools) 2.0)
           (climbing webs venomous)

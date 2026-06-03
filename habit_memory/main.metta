@@ -6,6 +6,7 @@
 !(let $import-step-3 (import! &self past_history_strengths) (empty))
 !(let $import-step-4 (import! &self candidate_generation) (empty))
 !(let $import-step-5 (import! &self winner_selection) (empty))
+!(let $import-persist (import! &self "persist_memory.py") (empty))
 
 ; No direct historica
 ;(= (concept-1) (climbing webs venomous))

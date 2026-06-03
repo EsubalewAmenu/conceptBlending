@@ -1,4 +1,4 @@
-; KR3: Peircean habit-based scoring methods from Section 6.
+; KR3: Peircean habit-based scoring methods
 
 (= (habit-weighted-joint $mu-u $mu-v $lambda-p $habit-strength)
    (+ (* $mu-u $mu-v)
