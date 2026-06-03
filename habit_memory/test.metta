@@ -4,14 +4,18 @@
 !(let $import-step-3 (import! &self past_history_strengths) (empty))
 !(let $import-step-4 (import! &self candidate_generation) (empty))
 
-; No direct historica
-
-(= (concept-1) (climbing webs venomous))
-(= (concept-2) (intelligence tools walking))
 
 ; Established Connection
-; (= (concept-1) (intelligence climbing webs))
-; (= (concept-2) (tools agility insects))
+;(= (concept-1) (intelligence climbing webs))
+;(= (concept-2) (tools agility insects))
+
+
+; No direct historica
+;(= (concept-1) (climbing webs venomous))
+;(= (concept-2) (intelligence tools walking))
+
+; (= (concept-1) (alpha beta))
+; (= (concept-2) (gamma delta))
 
 
 
