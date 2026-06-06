@@ -43,13 +43,16 @@ class TruthValueQuantale(QuantaleValue[float]):
            
     def tensor(self, other: 'TruthValueQuantale') -> 'TruthValueQuantale':
         # ⊗ is standard multiplication for product logic
+        self._require_compatible(other)
         return TruthValueQuantale(self.value * other.value)
 
     def join(self, other: 'TruthValueQuantale') -> 'TruthValueQuantale':
         # ⊕ is bounded addition (supremum in this context)
+        self._require_compatible(other)
         return TruthValueQuantale(min(self.value + other.value, 1.0))
 
     def residuation(self, other: 'TruthValueQuantale') -> 'TruthValueQuantale':
+        self._require_compatible(other)
         a = self.value
         b = other.value
         if a == 0.0:
@@ -58,4 +61,13 @@ class TruthValueQuantale(QuantaleValue[float]):
 
     def less_eq(self, other: 'TruthValueQuantale') -> bool:
         # ≤ is standard numeric less-than-or-equal
+        self._require_compatible(other)
         return self.value <= other.value
+    
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, TruthValueQuantale) and math.isclose(
+            self.value, other.value, rel_tol=1e-12, abs_tol=1e-12
+        )
+
+    def __hash__(self) -> int:
+        return hash((TruthValueQuantale, round(self.value, 12)))
