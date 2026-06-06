@@ -42,20 +42,31 @@ class ProductQuantale(QuantaleValue):
     def universal_set(self):
         return self.logic.universal_set
     
+    def _require_compatible(self, other: "ProductQuantale") -> None:
+        if not isinstance(other, ProductQuantale):
+            raise TypeError(f"Expected ProductQuantale, got {type(other).__name__}.")
+        # Ensure they share the exact same structural universe (W)
+        if self.logic.universal_set != other.logic.universal_set:
+            raise ValueError("ProductQuantale operations require the same logic universe W.")
+    
     def tensor(self, other: 'ProductQuantale') -> 'ProductQuantale':
         # Component-wise conjunction (⊗)
+        self._require_compatible(other)
         return ProductQuantale(self.logic * other.logic, self.tv * other.tv)
 
     def join(self, other: 'ProductQuantale') -> 'ProductQuantale':
         # Component-wise disjunction (⊕)
+        self._require_compatible(other)
         return ProductQuantale(self.logic + other.logic, self.tv + other.tv)
 
     def residuation(self, other: 'ProductQuantale') -> 'ProductQuantale':
         # Component-wise implication (⇒)
+        self._require_compatible(other)
         return ProductQuantale(self.logic >> other.logic, self.tv >> other.tv)
 
     def less_eq(self, other: 'ProductQuantale') -> bool:
         # Partial order holds ONLY if it holds for both components
+        self._require_compatible(other) 
         return (self.logic <= other.logic) and (self.tv <= other.tv)
 
     def to_metta(self) -> str:
