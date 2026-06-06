@@ -70,6 +70,13 @@ class ProductQuantale(QuantaleValue):
         return (self.logic <= other.logic) and (self.tv <= other.tv)
 
     def to_metta(self) -> str:
-        """Serializes the Python object into a PeTTa-compatible string."""
-        logic_str = " ".join(self.logic.value) if self.logic.value else "EmptyLogic"
-        return f"(ProductQuantale ({logic_str}) {self.tv.value})"
+        """Serialize deterministically into a PeTTa/MeTTa-compatible form."""
+        atoms = sorted(self.logic.value, key=lambda atom: atom.sort_key())
+        logic_str = " ".join(atom.to_metta_atom() for atom in atoms) if atoms else "EmptyLogic"
+        return f"(ProductQuantale ({logic_str}) {self.tv.value:g})"
+    
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, ProductQuantale) and self.logic == other.logic and self.tv == other.tv
+
+    def __hash__(self) -> int:
+        return hash((ProductQuantale, self.logic, self.tv))
