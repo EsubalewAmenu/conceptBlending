@@ -1,6 +1,11 @@
+from __future__ import annotations
+from collections.abc import Iterable
+from typing import Any
+
 from .quantale_base import QuantaleValue
 from .logic_quantale import LogicQuantale
 from .truth_value_quantale import TruthValueQuantale
+from .world_atom import WorldLike
 
 class ProductQuantale(QuantaleValue):
     """
@@ -8,11 +13,35 @@ class ProductQuantale(QuantaleValue):
     Fuses structural possible-worlds with fuzzy truth values.
     """
     def __init__(self, logic_val: LogicQuantale, tv_val: TruthValueQuantale):
+        if not isinstance(logic_val, LogicQuantale):
+            raise TypeError("ProductQuantale.logic_val must be a LogicQuantale.")
+        if not isinstance(tv_val, TruthValueQuantale):
+            raise TypeError("ProductQuantale.tv_val must be a TruthValueQuantale.")
         self.logic = logic_val
         self.tv = tv_val
-        # The 'value' is a tuple of the underlying sets and floats
         super().__init__((self.logic.value, self.tv.value))
 
+    @classmethod
+    def from_worlds(
+        cls,
+        logic_worlds: Iterable[WorldLike],
+        truth_value: float,
+        universal_set: Iterable[WorldLike],
+    ) -> "ProductQuantale":
+        return cls(LogicQuantale(logic_worlds, universal_set), TruthValueQuantale(truth_value))
+
+    @classmethod
+    def unit(cls, universal_set: Iterable[WorldLike]) -> "ProductQuantale":
+        return cls(LogicQuantale.unit(universal_set), TruthValueQuantale.unit())
+
+    @classmethod
+    def bottom(cls, universal_set: Iterable[WorldLike]) -> "ProductQuantale":
+        return cls(LogicQuantale.bottom(universal_set), TruthValueQuantale.bottom())
+
+    @property
+    def universal_set(self):
+        return self.logic.universal_set
+    
     def tensor(self, other: 'ProductQuantale') -> 'ProductQuantale':
         # Component-wise conjunction (⊗)
         return ProductQuantale(self.logic * other.logic, self.tv * other.tv)
