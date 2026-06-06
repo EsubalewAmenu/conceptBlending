@@ -1,3 +1,6 @@
+from __future__ import annotations
+import math
+from typing import Any
 from .quantale_base import QuantaleValue
 
 class TruthValueQuantale(QuantaleValue[float]):
@@ -6,9 +9,38 @@ class TruthValueQuantale(QuantaleValue[float]):
     Handles the fuzzy, graded property values extracted by the LLM.
     """
     def __init__(self, value: float):
-        # Ensure the value is strictly bounded between 0.0 and 1.0
-        super().__init__(max(0.0, min(float(value), 1.0)))
+        value = float(value)
+        if not math.isfinite(value):
+            raise ValueError("TruthValueQuantale value must be finite.")
+        if value < 0.0 or value > 1.0:
+            raise ValueError("TruthValueQuantale value must be in [0, 1].")
+        super().__init__(value)
+     
+    @classmethod
+    def clamped(cls, value: float) -> "TruthValueQuantale":
+        """Create a value by intentionally clipping an external score to [0,1]."""
+        value = float(value)
+        if not math.isfinite(value):
+            raise ValueError("Cannot clamp a non-finite truth value.")
+        return cls(max(0.0, min(value, 1.0)))
 
+    @classmethod
+    def unit(cls) -> "TruthValueQuantale":
+        """Monoidal unit e for multiplication (1.0)."""
+        return cls(1.0)
+
+    @classmethod
+    def bottom(cls) -> "TruthValueQuantale":
+        """Bottom/zero value (0.0)."""
+        return cls(0.0)
+
+    zero = bottom
+
+    def _require_compatible(self, other: "TruthValueQuantale") -> None:
+        """Ensure we don't accidentally multiply a float by a logic set."""
+        if not isinstance(other, TruthValueQuantale):
+            raise TypeError(f"Expected TruthValueQuantale, got {type(other).__name__}.")
+           
     def tensor(self, other: 'TruthValueQuantale') -> 'TruthValueQuantale':
         # ⊗ is standard multiplication for product logic
         return TruthValueQuantale(self.value * other.value)
