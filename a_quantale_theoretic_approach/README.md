@@ -4,7 +4,7 @@ This submodule implements a robust, automated pipeline for extracting and blendi
 
 ## 🚀 Current Status: Phase 1 Completed
 
-We have successfully moved from hardcoded/manual concepts to a learned extraction pipeline.
+I have successfully moved from hardcoded/manual concepts to a learned extraction pipeline.
 
 ### ✅ Accomplishments
 1.  **GNN-based Truth Value Extraction**:
@@ -25,6 +25,7 @@ The following stages are planned to complete the full blending engine:
 
 1.  **Semantic Property Discovery (Stage 2)**:
     - Replace mock property lists with an **LLM-based Zero-Shot extractor** to discover properties of arbitrary concepts autonomously.
+    - Replace synthetic training data in `gnn_trainer.py` with real **CSLB Concept Property Norms** (638 concepts).
 2.  **Blending Engine Implementation**:
     - Fleshing out `quantale_colimit_engine.py` to implement the **Pushout** logic for blending two V-Predicates.
 3.  **Optimization Loop**:
@@ -36,27 +37,93 @@ The following stages are planned to complete the full blending engine:
 
 ## 🏃 Quick Start for Mentor Review
 
-To verify the extraction pipeline and see the Product Quantales in action:
+> **All commands below must be run from the repo root:**
+> ```bash
+> cd ~/Desktop/conceptBlending
+> ```
 
 ### 1. Setup Environment
-Ensure the dependencies are installed (requires Python 3.8+):
+
+Requires **Python 3.8+**. Install core dependencies:
+
 ```bash
-pip install -r a_quantale_theoretic_approach/requirements.txt
+pip3 install torch sentence-transformers requests pytest --break-system-packages
 ```
 
-### 2. Run the Extraction Demo
-This script runs the full pipeline (Embedding -> GNN -> Axiom Extraction -> V-Predicate Assembly):
+Install `torch-geometric`:
+
 ```bash
+pip3 install torch-geometric --break-system-packages
+```
+
+> **Note**: `sentence-transformers` will automatically download the embedding model (~90MB) on first run.
+
+---
+
+### 2. Run the Test Suite
+
+Verifies that all algebraic axioms (commutativity, residuation, ordering) hold:
+
+```bash
+cd ~/Desktop/conceptBlending
+python3 -m pytest a_quantale_theoretic_approach/tests/test_truth_value_pipeline.py -v
+```
+
+Expected output:
+```
+test_truth_value_pipeline.py::TestTruthValuePipeline::test_ordering_sanity   PASSED
+test_truth_value_pipeline.py::TestTruthValuePipeline::test_quantale_axioms   PASSED
+test_truth_value_pipeline.py::TestTruthValuePipeline::test_reproducibility   PASSED
+3 passed
+```
+
+---
+
+### 3. Run the Extraction Demo
+
+Runs the full pipeline (Embedding → GNN → Axiom Extraction → V-Predicate Assembly) for House, Diamond, and Fire:
+
+```bash
+cd ~/Desktop/conceptBlending
 python3 -m a_quantale_theoretic_approach.demo_pipeline
 ```
 
-### 3. (Optional) Re-Train the GNN
-If you wish to re-train the truth-value refinement model on the bootstrapping data:
+Expected output (truth values may vary slightly):
+```lisp
+(= (VPredicate House expensive)   (ProductQuantale (Axiom_Default_Structural) 0.834))
+(= (VPredicate House stationary)  (ProductQuantale (Axiom_Default_Structural) 0.854))
+(= (VPredicate Diamond expensive) (ProductQuantale (Axiom_Default_Structural) 0.944))
+(= (VPredicate Diamond hard)      (ProductQuantale (Axiom_Default_Structural) 0.946))
+(= (VPredicate Fire hot)          (ProductQuantale (Axiom_Default_Structural) 0.917))
+(= (VPredicate Fire dangerous)    (ProductQuantale (Axiom_Default_Structural) 0.919))
+```
+
+---
+
+### 4. (Optional) Re-Train the GNN
+
+If you wish to re-train the truth-value refinement model from scratch:
+
 ```bash
+cd ~/Desktop/conceptBlending
 python3 -m a_quantale_theoretic_approach.core_representation.gnn_trainer
 ```
 
+Expected output:
+```
+Bootstrapping dataset...
+Starting training...
+Epoch 0: Loss 0.XXXX
+Epoch 10: Loss 0.XXXX
+Epoch 20: Loss 0.XXXX
+Model saved to gnn_weights.pth
+```
+
+---
+
 ## 📝 Technical Notes
-- **API Keys**: No API keys are required for Phase 1. `ConceptNet` queries use the public API, and embeddings use `sentence-transformers` (downloaded automatically).
-- **Weights**: Pre-trained weights are located in `core_representation/gnn_weights.pth`.
+
+- **API Keys**: No API keys are required for Phase 1. `ConceptNet` queries use the public API, and embeddings use `sentence-transformers` (downloaded automatically on first run).
+- **Weights**: Pre-trained weights are in `core_representation/gnn_weights.pth` and loaded automatically by the demo.
 - **MeTTa**: The demo outputs `(= (VPredicate ...))` assertions compatible with the AtomSpace/PeTTa version.
+- **Python**: Use `python3` (not `python`) on Linux systems where both Python 2 and 3 are installed.
