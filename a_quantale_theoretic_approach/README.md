@@ -35,7 +35,7 @@ The following stages are planned to complete the full blending engine:
 
 ---
 
-## 🏃 Quick Start for Mentor Review
+## 🏃 Quick Start 
 
 > **All commands below must be run from the repo root:**
 > ```bash
