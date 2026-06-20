@@ -68,5 +68,5 @@ if __name__ == "__main__":
     trained_model = train_quantale_gnn(model, train_data, epochs=30)
     
     # Save the model
-    torch.save(trained_model.state_dict(), "a_quantale_theoretic_approach/core_representation/gnn_weights.pth")
+    torch.save(trained_model.state_dict(), "a_quantale_theoretic_approach/extractor/gnn_weights.pth")
     print("Model saved to gnn_weights.pth")

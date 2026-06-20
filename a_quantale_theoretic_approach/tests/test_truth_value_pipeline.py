@@ -1,6 +1,6 @@
 import unittest
 import torch
-from a_quantale_theoretic_approach.core_representation.concept_extractor import ConceptEmbedder
+from a_quantale_theoretic_approach.extractor.concept_extractor import ConceptEmbedder
 from a_quantale_theoretic_approach.core_representation.truth_value_quantale import TruthValueQuantale
 
 class TestTruthValuePipeline(unittest.TestCase):

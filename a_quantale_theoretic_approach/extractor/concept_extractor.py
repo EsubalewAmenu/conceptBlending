@@ -4,10 +4,10 @@ from typing import Dict, List, Set, Tuple
 import torch
 from torch_geometric.data import Data # Added for type hinting and consistency
 from sentence_transformers import SentenceTransformer
-from .v_predicate import VPredicateConcept
-from .product_quantale import ProductQuantale
-from .truth_value_quantale import TruthValueQuantale
-from .logic_quantale import LogicQuantale
+from ..core_representation.v_predicate import VPredicateConcept
+from ..core_representation.product_quantale import ProductQuantale
+from ..core_representation.truth_value_quantale import TruthValueQuantale
+from ..core_representation.logic_quantale import LogicQuantale
 
 class ConceptEmbedder:
     """

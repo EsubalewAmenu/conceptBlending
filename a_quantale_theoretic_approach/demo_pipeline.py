@@ -1,12 +1,12 @@
 import torch
 import os
-from a_quantale_theoretic_approach.core_representation.concept_extractor import (
+from a_quantale_theoretic_approach.extractor.concept_extractor import (
     ConceptEmbedder, 
     build_concept_graph, 
     concept_to_vpredicate,
     get_axiom_set_for_property_from_conceptnet
 )
-from a_quantale_theoretic_approach.core_representation.gnn_truth_value import QuantaleTruthValueGNN
+from a_quantale_theoretic_approach.extractor.gnn_truth_value import QuantaleTruthValueGNN
 
 def run_demo():
     print("="*60)
@@ -18,7 +18,7 @@ def run_demo():
     embedder = ConceptEmbedder(model_name=model_name)
     model = QuantaleTruthValueGNN(input_dim=384)
     
-    weights_path = "a_quantale_theoretic_approach/core_representation/gnn_weights.pth"
+    weights_path = "a_quantale_theoretic_approach/extractor/gnn_weights.pth"
     if os.path.exists(weights_path):
         model.load_state_dict(torch.load(weights_path))
         print(f"Loaded trained GNN weights from {weights_path}")
