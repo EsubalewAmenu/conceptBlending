@@ -4,7 +4,7 @@ from a_quantale_theoretic_approach.extractor.concept_extractor import (
     ConceptEmbedder, 
     build_concept_graph, 
     concept_to_vpredicate,
-    get_axiom_set_for_property_from_conceptnet
+    get_axioms_for_property
 )
 from a_quantale_theoretic_approach.extractor.gnn_truth_value import QuantaleTruthValueGNN
 
@@ -14,30 +14,33 @@ def run_demo():
     print("="*60)
     
     # 1. Setup
-    model_name = "all-MiniLM-L6-v2"
+    model_name = "all-mpnet-base-v2"
     embedder = ConceptEmbedder(model_name=model_name)
-    model = QuantaleTruthValueGNN(input_dim=384)
+    model = QuantaleTruthValueGNN(input_dim=768)
     
     weights_path = "a_quantale_theoretic_approach/extractor/gnn_weights.pth"
     if os.path.exists(weights_path):
-        model.load_state_dict(torch.load(weights_path))
+        model.load_state_dict(torch.load(weights_path, map_location=torch.device('cpu')))
         print(f"Loaded trained GNN weights from {weights_path}")
     else:
         print("Warning: GNN weights not found. Running with initial weights.")
     
     model.eval()
     
-    # 2. Concepts to test
-    test_concepts = ["House", "Diamond", "Fire"]
+    # 2. Concepts to test (selected from real AtomSpace data)
+    test_concepts = ["Art", "Dice", "Fire"]
     
-    # Mock property lists (Stage 1 usually handles this with LLM)
     concept_properties = {
-        "House": ["expensive", "stationary", "large", "safe"],
-        "Diamond": ["expensive", "hard", "rare", "beautiful"],
+        "Art": ["beautiful", "subjective", "abstract", "philosophical"],
+        "Dice": ["cube", "small", "hard", "numbered"],
         "Fire": ["hot", "dangerous", "bright", "red"]
     }
     
-    universal_axioms = {"Axiom_Property", "Axiom_IsA", "Axiom_PartOf", "Axiom_Function", "Axiom_Implicit"}
+    universal_axioms = {
+        "Axiom_Property", "Axiom_IsA", "Axiom_PartOf", 
+        "Axiom_Function", "Axiom_Implicit", "Axiom_Related", 
+        "Axiom_Default_Structural"
+    }
 
     for concept_name in test_concepts:
         print(f"\nProcessing Concept: {concept_name}")
@@ -62,7 +65,7 @@ def run_demo():
             prop_truth_values[prop_name] = truth_value
             
             # Extract symbolic axioms (Stage 4)
-            axioms = get_axiom_set_for_property_from_conceptnet(concept_name, prop_name)
+            axioms = get_axioms_for_property(concept_name, prop_name)
             prop_axiom_sets[prop_name] = axioms
             
         # Assemble the final V-Predicate Concept object

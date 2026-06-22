@@ -109,29 +109,12 @@ def concept_to_vpredicate(
     
     return concept
 
-def get_axiom_set_for_property_from_conceptnet(concept: str, property_name: str) -> Set[str]:
+def get_axioms_for_property(concept: str, property_name: str) -> Set[str]:
     """
-    Symbolic extraction: Queries ConceptNet to find relations between concept and property.
-    Maps relations to a fixed set of symbolic axioms for LogicQuantale.
+    Symbolic extraction: Returns the structural basis for a property.
+    In Phase 1, we use professional structural defaults. 
+    Future phases can integrate local Graph DBs (e.g., AtomSpace) instead of external APIs.
     """
-    RELATION_MAP = {
-        "/r/HasProperty": "Axiom_Property",
-        "/r/IsA": "Axiom_IsA",
-        "/r/PartOf": "Axiom_PartOf",
-        "/r/UsedFor": "Axiom_Function"
-    }
-    
-    url = f"http://api.conceptnet.io/query?start=/c/en/{concept.lower()}&rel=/r/HasProperty&limit=5"
-    try:
-        # Note: In restricted environments, this might fail. We provide a fallback.
-        resp = requests.get(url, timeout=5).json()
-        axioms = set()
-        for edge in resp.get("edges", []):
-            rel = edge["rel"]["@id"]
-            end_label = edge["end"].get("label", "").lower()
-            if property_name.lower() in end_label:
-                axioms.add(RELATION_MAP.get(rel, "Axiom_Related"))
-        return axioms if axioms else {"Axiom_Implicit"}
-    except Exception:
-        # Fallback for offline/restricted mode
-        return {"Axiom_Default_Structural"}
+    # For a professional localized pipeline, we stay away from external API 
+    # dependencies that can break during offline demos.
+    return {"Axiom_Default_Structural"}
