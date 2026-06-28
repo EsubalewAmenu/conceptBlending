@@ -28,6 +28,22 @@ class LogicQuantale(QuantaleValue[FrozenSet[WorldAtom]]):
         self.universal_set: FrozenSet[WorldAtom] = universe
         super().__init__(subset)
 
+    @classmethod
+    def unit(cls, universal_set: Iterable[WorldLike]) -> "LogicQuantale":
+        """Monoidal unit/top element W for intersection."""
+        return cls(universal_set, universal_set)
+
+    @classmethod
+    def bottom(cls, universal_set: Iterable[WorldLike]) -> "LogicQuantale":
+        """Bottom element, the empty set."""
+        return cls((), universal_set)
+
+    zero = bottom
+
+    def with_universe(self, universal_set: Iterable[WorldLike]) -> "LogicQuantale":
+        """Rebuild this value against a larger compatible universe."""
+        return LogicQuantale(self.value, universal_set)
+
     def _require_compatible(self, other: 'LogicQuantale') -> None:
         if not isinstance(other, LogicQuantale):
             raise TypeError(f"Expected LogicQuantale, got {type(other).__name__}.")
@@ -54,3 +70,13 @@ class LogicQuantale(QuantaleValue[FrozenSet[WorldAtom]]):
         # ≤ is subset relation (⊆)
         self._require_compatible(other)
         return self.value.issubset(other.value)
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, LogicQuantale)
+            and self.value == other.value
+            and self.universal_set == other.universal_set
+        )
+
+    def __hash__(self) -> int:
+        return hash((LogicQuantale, self.value, self.universal_set))
