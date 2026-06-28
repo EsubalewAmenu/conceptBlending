@@ -25,8 +25,9 @@ python3 -m a_quantale_theoretic_approach.demo_pipeline
 The output will display the generated **Product Quantales** for concepts like Art, Dice, and Fire:
 
 ```lisp
-(= (VPredicate Art beautiful)      (ProductQuantale (Axiom_Default_Structural) 0.103))
-(= (VPredicate Dice numbered)     (ProductQuantale (Axiom_Default_Structural) 0.239))
+(= (VPredicate Art beautiful)      (ProductQuantale (Axiom_Default_Structural) 0.186))
+(= (VPredicate Fire red)           (ProductQuantale (Axiom_Default_Structural) 0.284))
+(= (VPredicate Dice cube)          (ProductQuantale (Axiom_Default_Structural) 0.291))
 ```
 
 ### 3. Verify Logical Consistency
@@ -46,22 +47,39 @@ python3 -m pytest a_quantale_theoretic_approach/tests/test_truth_value_pipeline.
 
 ### 2. Truth-Value Refinement (`extractor/gnn_truth_value.py`)
 - **Purpose**: Refines the statistical "strength" of properties using structural relations.
-- **Implementation**: A 2-layer **Graph Attention Network (GAT)** trained on the **CSLB Concept Property Norms** and **ConceptNet** (AtomSpace) data.
+- **Implementation**: A 2-layer **Graph Attention Network (GAT)** trained on **ConceptNet** (AtomSpace) `hasProperty` triples with combined MSE + ranking loss.
+- **Training details**: Spearman-rank checkpointing, ranking loss with exponential decay, 70/30 train/test split, cosine annealing LR.
 
 ### 3. Mathematical Alignment (`core_representation/`)
 - **LogicQuantale**: Encodes the symbolic relation skeleton (e.g., *IsA*, *Partof*) into algebraic axioms.
-- **TruthValueQuantale**: Ensures all numeric outputs satisfy the mathematical properties of a commutative residented quantale.
+- **TruthValueQuantale**: Ensures all numeric outputs satisfy the mathematical properties of a commutative residuated quantale.
 
 ---
 
-## (Optional) Training and Customization
+## (Optional) Re-Training the GNN
 
-### Re-Training the Model
-To re-train the underlying GNN on specific subsections of the OpenCog AtomSpace dataset:
+The training script uses the shared `concept-atomspace` dataset. Point `--data_dir` to your local copy of the unzipped `concept-atomspace-pettav` folder:
 
 ```bash
-python3 -m a_quantale_theoretic_approach.extractor.gnn_trainer --data_dir path/to/concept-atomspace --batch_size 200
+python3 -m a_quantale_theoretic_approach.extractor.gnn_trainer \
+    --data_dir /path/to/your/concept-atomspace-pettav
 ```
 
-### Configuration
-Pre-trained weights are stored in `a_quantale_theoretic_approach/extractor/gnn_weights.pth` and are loaded automatically by the `demo_pipeline.py`.
+The trainer will automatically parse `hasProperty` triples, apply min-max normalization, build concept graphs, and train with Spearman-rank checkpointing.
+
+### Available Hyperparameters
+
+| Flag | Default | Description |
+|---|---|---|
+| `--epochs` | 100 | Maximum training epochs |
+| `--lr` | 0.0005 | Learning rate |
+| `--patience` | 30 | Early stopping patience (on Spearman) |
+| `--min_props` | 3 | Minimum properties per concept |
+| `--train_split` | 0.70 | Train/test split ratio |
+| `--rank_weight` | 0.5 | Initial ranking loss weight |
+| `--rank_decay` | 0.99 | Ranking loss exponential decay |
+| `--margin` | 0.05 | Ranking loss margin |
+| `--output` | `extractor/gnn_weights.pth` | Output weights path |
+
+### Pre-Trained Weights
+The current production weights (`extractor/gnn_weights.pth`) are loaded automatically by `demo_pipeline.py`. They were trained with Spearman correlation of **0.40** on 115 held-out concepts.
