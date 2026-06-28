@@ -41,6 +41,10 @@ class ProductQuantale(QuantaleValue):
     @property
     def universal_set(self):
         return self.logic.universal_set
+
+    def with_universe(self, universal_set: Iterable[WorldLike]) -> "ProductQuantale":
+        """Rebuild this product value against a larger compatible logic universe."""
+        return ProductQuantale(self.logic.with_universe(universal_set), self.tv)
     
     def _require_compatible(self, other: "ProductQuantale") -> None:
         if not isinstance(other, ProductQuantale):
@@ -74,6 +78,14 @@ class ProductQuantale(QuantaleValue):
         atoms = sorted(self.logic.value, key=lambda atom: atom.sort_key())
         logic_str = " ".join(atom.to_metta_atom() for atom in atoms) if atoms else "EmptyLogic"
         return f"(ProductQuantale ({logic_str}) {self.tv.value:g})"
+
+    def to_worldspec_value_metta(self) -> str:
+        """Serialize as the paper-style ``(WorldSpecSet (...)) degree`` pair."""
+        atoms = sorted(self.logic.value, key=lambda atom: atom.sort_key())
+        worlds = "\n           ".join(atom.to_metta_atom() for atom in atoms)
+        if worlds:
+            return f"(WorldSpecSet\n          ({worlds}))\n        {self.tv.value:g}"
+        return f"(WorldSpecSet ())\n        {self.tv.value:g}"
     
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, ProductQuantale) and self.logic == other.logic and self.tv == other.tv
