@@ -9,8 +9,8 @@
 !(let $import-persist (import! &self "persist_memory.py") (empty))
 
 ; No direct historica
-;(= (concept-1) (climbing webs venomous))
-;(= (concept-2) (intelligence tools walking))
+; (= (concept-1) (climbing webs venomous))
+; (= (concept-2) (intelligence tools walking))
 
 (= (concept-1) (alpha beta))
 (= (concept-2) (gamma delta))
