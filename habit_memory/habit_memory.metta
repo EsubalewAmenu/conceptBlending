@@ -4,7 +4,55 @@
    (habit-memory ()))
 
 (= (source-historical-blends)
-   (collapse (match &self ($a $b $c) ($a $b $c))))
+   (append
+      (collapse
+         (match &self
+            (Concept $concept-name
+               (V-predicate
+                  (Property
+                     ($property-1 $world-spec-set-1 $degree-1))))
+            ($property-1)))
+      (append
+         (collapse
+            (match &self
+               (Concept $concept-name
+                  (V-predicate
+                     (Property
+                        ($property-1 $world-spec-set-1 $degree-1)
+                        ($property-2 $world-spec-set-2 $degree-2))))
+               ($property-1 $property-2)))
+         (append
+            (collapse
+               (match &self
+                  (Concept $concept-name
+                     (V-predicate
+                        (Property
+                           ($property-1 $world-spec-set-1 $degree-1)
+                           ($property-2 $world-spec-set-2 $degree-2)
+                           ($property-3 $world-spec-set-3 $degree-3))))
+                  ($property-1 $property-2 $property-3)))
+            (append
+               (collapse
+                  (match &self
+                     (Concept $concept-name
+                        (V-predicate
+                           (Property
+                              ($property-1 $world-spec-set-1 $degree-1)
+                              ($property-2 $world-spec-set-2 $degree-2)
+                              ($property-3 $world-spec-set-3 $degree-3)
+                              ($property-4 $world-spec-set-4 $degree-4))))
+                     ($property-1 $property-2 $property-3 $property-4)))
+               (collapse
+                  (match &self
+                     (Concept $concept-name
+                        (V-predicate
+                           (Property
+                              ($property-1 $world-spec-set-1 $degree-1)
+                              ($property-2 $world-spec-set-2 $degree-2)
+                              ($property-3 $world-spec-set-3 $degree-3)
+                              ($property-4 $world-spec-set-4 $degree-4)
+                              ($property-5 $world-spec-set-5 $degree-5))))
+                     ($property-1 $property-2 $property-3 $property-4 $property-5))))))))
 
 (= (clean-history ())
    ())
