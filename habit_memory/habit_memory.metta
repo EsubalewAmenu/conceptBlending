@@ -3,48 +3,65 @@
 (= (new-habit-memory)
    (habit-memory ()))
 
-(= (source-historical-blends)
+(= (repeat-blend $count $blend)
+   (if (<= $count 0)
+       ()
+       (cons $blend (repeat-blend (- $count 1) $blend))))
+
+(= (flatten-history-results ())
+   ())
+(= (flatten-history-results (cons $entry $remaining-results))
+   (if (is-expr $entry)
+       (append $entry (flatten-history-results $remaining-results))
+       (flatten-history-results $remaining-results)))
+
+(= (source-historical-blend-results)
    (append
       (collapse
          (match &self
             (Concept $concept-name
+               (HabitCount $count)
                (V-predicate
                   (Property
                      ($property-1 $world-spec-set-1 $degree-1))))
-            ($property-1)))
+            (repeat-blend $count ($property-1))))
       (append
          (collapse
             (match &self
                (Concept $concept-name
+                  (HabitCount $count)
                   (V-predicate
                      (Property
                         ($property-1 $world-spec-set-1 $degree-1)
                         ($property-2 $world-spec-set-2 $degree-2))))
-               ($property-1 $property-2)))
+               (repeat-blend $count ($property-1 $property-2))))
          (append
             (collapse
                (match &self
                   (Concept $concept-name
+                     (HabitCount $count)
                      (V-predicate
                         (Property
                            ($property-1 $world-spec-set-1 $degree-1)
                            ($property-2 $world-spec-set-2 $degree-2)
                            ($property-3 $world-spec-set-3 $degree-3))))
-                  ($property-1 $property-2 $property-3)))
+                  (repeat-blend $count ($property-1 $property-2 $property-3))))
             (append
                (collapse
                   (match &self
                      (Concept $concept-name
+                        (HabitCount $count)
                         (V-predicate
                            (Property
                               ($property-1 $world-spec-set-1 $degree-1)
                               ($property-2 $world-spec-set-2 $degree-2)
                               ($property-3 $world-spec-set-3 $degree-3)
                               ($property-4 $world-spec-set-4 $degree-4))))
-                     ($property-1 $property-2 $property-3 $property-4)))
+                     (repeat-blend $count ($property-1 $property-2 $property-3 $property-4))))
                (collapse
                   (match &self
                      (Concept $concept-name
+                        (HabitCount $count)
                         (V-predicate
                            (Property
                               ($property-1 $world-spec-set-1 $degree-1)
@@ -52,7 +69,10 @@
                               ($property-3 $world-spec-set-3 $degree-3)
                               ($property-4 $world-spec-set-4 $degree-4)
                               ($property-5 $world-spec-set-5 $degree-5))))
-                     ($property-1 $property-2 $property-3 $property-4 $property-5))))))))
+                     (repeat-blend $count ($property-1 $property-2 $property-3 $property-4 $property-5)))))))))
+
+(= (source-historical-blends)
+   (flatten-history-results (source-historical-blend-results)))
 
 (= (clean-history ())
    ())
