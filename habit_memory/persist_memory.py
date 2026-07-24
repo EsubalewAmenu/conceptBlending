@@ -36,12 +36,13 @@ def _v_predicate_from_blend_text(blend_text):
 
 
 def persist_blend(blend):
-    """Append a selected blend to memory.metta as a persistent habit fact."""
+    """Append a selected blend to memory.metta as a V-predicate concept fact."""
     blend_text = _metta_atom_to_text(blend).strip()
     if not blend_text.startswith("("):
         blend_text = f"({blend_text})"
+    concept_text = _v_predicate_from_blend_text(blend_text)
 
     existing = MEMORY_PATH.read_text() if MEMORY_PATH.exists() else ""
     separator = "" if existing.endswith("\n") or existing == "" else "\n"
-    MEMORY_PATH.write_text(f"{existing}{separator}{blend_text}\n")
-    return blend_text
+    MEMORY_PATH.write_text(f"{existing}{separator}{concept_text}\n")
+    return concept_text
