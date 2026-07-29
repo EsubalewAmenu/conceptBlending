@@ -123,7 +123,7 @@ synonym        usedFor
 
 ## Known limitations
 
-- The scorer only ever sees the two endpoints of the triple being scored, which we don't have to have.
+- The scorer only ever sees the two endpoints of the triple being scored, which bypass the need to have an atomspace or any graph to infer from.
 - The weight and bais factor cosine similarity with respect to each relation should be checked and verifed the contribution of other scorer like distance translation and gamma also have their fair share of score prediction.  
 
 - The nature of the dataset from ConceptnetLite or in general any concpet property relation scoreres online have a raw weight partly encodes which extraction pipeline produced an assertion, rather than only its truthfulness, has not been directly verified despite our model try to handle them with hard negative datasets.
