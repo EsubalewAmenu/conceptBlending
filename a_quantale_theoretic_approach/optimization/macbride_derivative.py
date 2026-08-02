@@ -6,8 +6,8 @@ Implements Section 7 of Goertzel (2026):
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Callable, Optional, Dict, List
+from dataclasses import dataclass
+from typing import Callable, Optional
 import copy
 
 from a_quantale_theoretic_approach.core_representation.product_quantale import ProductQuantale
@@ -36,11 +36,10 @@ def habit_weighted_valuation(
     universe: tuple[str, ...],
     habit_scores: dict[str, float],
 ) -> ProductQuantale:
-    """φ(p) = habit strength of property p."""
-    score = habit_scores.get(prop_name, 0.5)
-    score = max(0.0, min(1.0, score))
-    unit_q = ProductQuantale.unit(universe)
-    return ProductQuantale(unit_q.logic, type(unit_q.tv)(score))
+    """φ(p) = habit strength of property p. TV is the habit score; logic is universal."""
+    score = max(0.0, min(1.0, habit_scores.get(prop_name, 0.5)))
+    unit = ProductQuantale.unit(universe)
+    return ProductQuantale(unit.logic, type(unit.tv)(score))
 
 def weakness(concept: VPredicateConcept, valuation: ValuationFn) -> ProductQuantale:
     """w(C) = ⊕_{p ∈ Props} φ(p) ⊗ mC(p)"""
@@ -122,23 +121,18 @@ def _natural_gradient_tv_step(
     deg^(t+1)(p,C) = deg^(t) + η · deg · (1-deg) · ∂^tv_p σ   [Eq. 53]
 
     The Bernoulli variance factor deg·(1-deg) naturally shrinks steps
-    near the boundaries [0,1]. We only apply a small rescue floor when
-    a TV is so close to zero that variance rounds to 0.0 in float32,
-    preventing permanent stall on genuinely weak properties.
+    near the boundaries [0,1]. A small rescue floor prevents permanent
+    stall when TV rounds to 0.0 in float32.
     """
     variance = current_tv * (1.0 - current_tv)
 
     # Rescue floor only: prevents permanent stall when TV ≈ 0.
-    # Does NOT apply near the upper boundary — high-TV properties
-    # should naturally slow down.
+    # Does NOT apply near the upper boundary — high-TV properties slow naturally.
     if variance < 1e-6:
         variance = 1e-6
 
     step = eta * variance * derivative_tv
-    new_tv = current_tv + step
-
-    # Clamp to [0.10, 0.99] — consistent with Phase 1 training floor
-    return max(0.10, min(0.99, new_tv))
+    return max(0.10, min(0.99, current_tv + step))
 
 def apply_gradient_step(
     blend: VPredicateConcept,
@@ -231,6 +225,8 @@ class McBrideOptimizer:
         source_b: VPredicateConcept,
         **kwargs,
     ) -> McBrideOptimizer:
+        # colimit_result is accepted for API symmetry but not currently used.
+        # Future: extract blend universe or initial synergy metrics from it.
         return cls(source_a=source_a, source_b=source_b, **kwargs)
 
     def refine(

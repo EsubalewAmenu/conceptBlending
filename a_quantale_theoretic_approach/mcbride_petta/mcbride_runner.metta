@@ -1,28 +1,42 @@
-;; McBride Derivative Optimization in PeTTA
-;; Refines a V-predicate colimit blend to maximize Quantale emergence.
+;; =============================================================================
+;; McBride Derivative Optimization — MeTTa Runner
+;; =============================================================================
+;;
+;; Implements MeTTa entry points for Section 7 of Goertzel (2026):
+;; "Quantale Weakness Based Conceptual Blending"
+;;
+;; Public functions:
+;;   (mcbride-refine $blend $source-a $source-b)
+;;       Refine a blend using default η=0.05, steps=20.
+;;   (mcbride-emergence $blend $source-a $source-b)
+;;       Compute the emergence score σ without refinement.
+;;   (quantale-blend-and-refine $name $concept-a $concept-b $mappings)
+;;       Full pipeline: colimit pushout then McBride refinement.
+;;
+;; Requires: mcbride_grounded.register_mcbride_atoms(metta) called before use.
+;; =============================================================================
 
 !(import! &self a_quantale_theoretic_approach/core_representation/quantale_types)
 !(import! &self a_quantale_theoretic_approach/core_representation/v_predicate)
 !(import! &self a_quantale_theoretic_approach/structural_reasoning/quantale_colimit_engine)
 
-;; Default hyperparameters
 (= (mcbride-default-eta)   0.05)
 (= (mcbride-default-steps) 20)
 
-;; Core refinement atom call
+;; Public: refine with default hyperparameters
 (= (mcbride-refine $blend $source-a $source-b)
    (mcbride-refine-with $blend $source-a $source-b
                         (mcbride-default-eta)
                         (mcbride-default-steps)))
 
+;; Internal: dispatches to the grounded Python atom with explicit parameters.
+;; Prefer (mcbride-refine ...) for external use.
 (= (mcbride-refine-with $blend $source-a $source-b $eta $steps)
    (mcbride-py-refine $blend $source-a $source-b $eta $steps))
 
-;; Compute emergence score only (no refinement)
 (= (mcbride-emergence $blend $source-a $source-b)
    (mcbride-py-emergence $blend $source-a $source-b))
 
-;; Full pipeline: colimit then McBride refinement
 (= (quantale-blend-and-refine $name $concept-a $concept-b $mappings)
    (let $colimit (q-vpredicate-colimit $name $concept-a $concept-b $mappings)
         (mcbride-refine $colimit $concept-a $concept-b)))

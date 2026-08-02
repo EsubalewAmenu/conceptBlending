@@ -18,14 +18,14 @@ Connects to:
 from __future__ import annotations
 import copy
 import random
-from dataclasses import dataclass, field
+import warnings
+from dataclasses import dataclass
 from typing import Optional, List, Dict, Tuple
 
 from a_quantale_theoretic_approach.core_representation.v_predicate import VPredicateConcept
 from a_quantale_theoretic_approach.core_representation.product_quantale import ProductQuantale
 from a_quantale_theoretic_approach.optimization.macbride_derivative import (
     McBrideOptimizer,
-    McBrideRefinementResult,
     emergence_tv,
     uniform_valuation,
 )
@@ -140,52 +140,52 @@ class HybridSearchLoop:
         )
 
     def _evaluate(self, candidate: BlendCandidate) -> None:
-        """Score a candidate on all fitness objectives."""
+        """Score a candidate on all three fitness objectives."""
+        self._score_emergence(candidate)
+        self._score_coherence(candidate)
+        self._score_peircean(candidate)
+
+    def _score_emergence(self, candidate: BlendCandidate) -> None:
         candidate.emergence = emergence_tv(
             self.source_a, self.source_b, candidate.blend, uniform_valuation
         )
-        # Evaluate optimality constraints (coherence proxy)
+
+    def _score_coherence(self, candidate: BlendCandidate) -> None:
         try:
-            # Build a minimal but valid WorldSpecRegistry from the blend's universe
             registry = WorldSpecRegistry()
             if candidate.blend.universal_set:
                 registry = registry.ensure_worlds(candidate.blend.universal_set)
-
-            refined_colimit = QuantaleColimitResult(
+            colimit = QuantaleColimitResult(
                 blend=candidate.blend,
                 world_specs=registry,
                 property_maps={},
             )
-            opt_report = evaluate_quantale_optimality(
-                self.source_a, self.source_b, refined_colimit
+            report = evaluate_quantale_optimality(
+                self.source_a, self.source_b, colimit
             )
-            # Use scalar_score if available, otherwise fall back gracefully
-            if hasattr(opt_report, 'scalar_score') and opt_report.scalar_score is not None:
-                candidate.coherence = float(opt_report.scalar_score)
-            elif hasattr(opt_report, 'overall') and opt_report.overall is not None:
-                candidate.coherence = float(opt_report.overall)
+            if hasattr(report, 'scalar_score') and report.scalar_score is not None:
+                candidate.coherence = float(report.scalar_score)
+            elif hasattr(report, 'overall') and report.overall is not None:
+                candidate.coherence = float(report.overall)
             else:
                 candidate.coherence = candidate.emergence * 0.9
-        except Exception as e:
-            # Log the actual error so it is not silently lost
-            import warnings
+        except Exception as exc:
             warnings.warn(
-                f"Optimality evaluation failed for candidate blend "
-                f"'{candidate.blend.name}': {e}. "
+                f"Optimality evaluation failed for '{candidate.blend.name}': {exc}. "
                 f"Falling back to coherence proxy.",
                 RuntimeWarning,
                 stacklevel=2,
             )
             candidate.coherence = candidate.emergence * 0.9
 
-        # Peircean quality scoring via habit memory / property salience
-        if candidate.blend.entries:
-            candidate.peircean_quality = sum(
-                self.habit_scores.get(p, 0.5) * e.quantale.tv.value
-                for p, e in candidate.blend.entries.items()
-            ) / len(candidate.blend.entries)
-        else:
+    def _score_peircean(self, candidate: BlendCandidate) -> None:
+        if not candidate.blend.entries:
             candidate.peircean_quality = 0.0
+            return
+        candidate.peircean_quality = sum(
+            self.habit_scores.get(p, 0.5) * e.quantale.tv.value
+            for p, e in candidate.blend.entries.items()
+        ) / len(candidate.blend.entries)
 
     def _pareto_front(self, population: List[BlendCandidate]) -> List[BlendCandidate]:
         front = []
@@ -195,22 +195,18 @@ class HybridSearchLoop:
         return front
 
     def run(self) -> List[BlendCandidate]:
-        """
-        Run the hybrid search. Returns the Pareto front of best blends.
-        """
+        """Run the hybrid search. Returns the Pareto front of best blends."""
         population: List[BlendCandidate] = []
         seed = BlendCandidate(blend=copy.deepcopy(self.initial_blend), generation=0)
         self._evaluate(seed)
         population.append(seed)
 
         for _ in range(self.population_size - 1):
-            mutant_blend = _mutate_blend(self.initial_blend)
-            candidate = BlendCandidate(blend=mutant_blend, generation=0)
+            candidate = BlendCandidate(blend=_mutate_blend(self.initial_blend), generation=0)
             self._evaluate(candidate)
             population.append(candidate)
 
         for generation in range(self.max_generations):
-            # Local refinement: apply McBride gradient steps to a subset
             for candidate in population:
                 if not candidate.refined and random.random() < self.local_refinement_prob:
                     result = self.mcbride.refine(candidate.blend)
@@ -218,7 +214,6 @@ class HybridSearchLoop:
                     candidate.refined = True
                     self._evaluate(candidate)
 
-            # Generate offspring via crossover + mutation
             offspring: List[BlendCandidate] = []
             front = self._pareto_front(population)
             pool = front if front else population
@@ -227,7 +222,6 @@ class HybridSearchLoop:
                     parents = random.sample(pool, 2)
                 else:
                     parents = [pool[0], pool[0]]
-                
                 if len(parents) == 2 and parents[0] is not parents[1]:
                     child_blend = _crossover_blends(parents[0].blend, parents[1].blend)
                 else:
@@ -237,7 +231,6 @@ class HybridSearchLoop:
                 self._evaluate(child)
                 offspring.append(child)
 
-            # Environmental selection: keep best by Pareto dominance
             combined = population + offspring
             population = self._pareto_front(combined)
             if len(population) > self.population_size:

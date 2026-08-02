@@ -16,17 +16,26 @@ from a_quantale_theoretic_approach.core_representation.v_predicate import (
 
 
 def _concept_from_metta_atom(atom: Any) -> VPredicateConcept:
-    """Convert a MeTTa (Concept ...) atom to a Python VPredicateConcept."""
-    atom_str = str(atom)
-    return parse_v_predicate_concept(atom_str)
+    """Parse a MeTTa atom's string representation into a VPredicateConcept.
+
+    The atom must serialise as a (Concept ...) S-expression.
+    This function calls str(atom) first, so it works with any MeTTa
+    atom type that has a valid string form.
+    """
+    return parse_v_predicate_concept(str(atom))
 
 
 def mcbride_py_refine(blend_atom, source_a_atom, source_b_atom, eta_atom, steps_atom):
-    blend    = _concept_from_metta_atom(blend_atom)
-    source_a = _concept_from_metta_atom(source_a_atom)
-    source_b = _concept_from_metta_atom(source_b_atom)
-    eta      = float(str(eta_atom))
-    steps    = int(str(steps_atom))
+    try:
+        blend    = _concept_from_metta_atom(blend_atom)
+        source_a = _concept_from_metta_atom(source_a_atom)
+        source_b = _concept_from_metta_atom(source_b_atom)
+        eta      = float(str(eta_atom))
+        steps    = int(str(steps_atom))
+    except Exception as exc:
+        raise RuntimeError(
+            f"mcbride-py-refine: failed to parse arguments — {exc}"
+        ) from exc
 
     optimizer = McBrideOptimizer(
         source_a=source_a, source_b=source_b,
@@ -37,9 +46,15 @@ def mcbride_py_refine(blend_atom, source_a_atom, source_b_atom, eta_atom, steps_
 
 
 def mcbride_py_emergence(blend_atom, source_a_atom, source_b_atom):
-    blend    = _concept_from_metta_atom(blend_atom)
-    source_a = _concept_from_metta_atom(source_a_atom)
-    source_b = _concept_from_metta_atom(source_b_atom)
+    try:
+        blend    = _concept_from_metta_atom(blend_atom)
+        source_a = _concept_from_metta_atom(source_a_atom)
+        source_b = _concept_from_metta_atom(source_b_atom)
+    except Exception as exc:
+        raise RuntimeError(
+            f"mcbride-py-emergence: failed to parse arguments — {exc}"
+        ) from exc
+
     score = emergence_tv(source_a, source_b, blend, uniform_valuation)
     return ValueAtom(score)
 
