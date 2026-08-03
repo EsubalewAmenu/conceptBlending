@@ -124,6 +124,13 @@ synonym        usedFor
 ## Known limitations
 
 - The scorer only ever sees the two endpoints of the triple being scored, which bypass the need to have an atomspace or any graph to infer from.
-- The weight and bais factor cosine similarity with respect to each relation should be checked and verifed the contribution of other scorer like distance translation and gamma also have their fair share of score prediction.  
+- The weight and bais factor cosine similarity with respect to each relation should be checked and verifed(done). In the updated model normalization is applied to cosine similarity parameteres.   
 
 - The nature of the dataset from ConceptnetLite or in general any concpet property relation scoreres online have a raw weight partly encodes which extraction pipeline produced an assertion, rather than only its truthfulness, has not been directly verified despite our model try to handle them with hard negative datasets.
+
+## recommendations
+- Increasing the size of the encoder will enhance the model performance But it will require more compuational power than we currently have. It could be done either increasing the hidden dimension from 128 to larger number upto 700 (must be divisble by the head) or by increasing the dimension of the head or both. 
+
+
+
+- 
