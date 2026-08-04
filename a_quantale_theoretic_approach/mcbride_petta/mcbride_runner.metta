@@ -16,8 +16,9 @@
 ;; Requires: mcbride_grounded.register_mcbride_atoms(metta) called before use.
 ;; =============================================================================
 
-!(import! &self a_quantale_theoretic_approach/core_representation/quantale_types)
-!(import! &self a_quantale_theoretic_approach/core_representation/v_predicate)
+; The colimit engine transitively imports quantale_types and v_predicate.
+; Importing them again here duplicates PeTTa rewrite rules and causes an
+; exponential number of reductions for quantale-blend-and-refine.
 !(import! &self a_quantale_theoretic_approach/structural_reasoning/quantale_colimit_engine)
 
 (= (mcbride-default-eta)   0.05)
