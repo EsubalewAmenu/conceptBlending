@@ -51,12 +51,12 @@ class TestMettaRunnerImports(unittest.TestCase):
         with open(path) as f:
             content = f.read()
 
-        colimit_import = (
+        refinement_import = (
             "!(import! &self "
-            "a_quantale_theoretic_approach/structural_reasoning/"
-            "quantale_colimit_engine)"
+            "a_quantale_theoretic_approach/mcbride_petta/"
+            "refinement_loop)"
         )
-        self.assertIn(colimit_import, content)
+        self.assertIn(refinement_import, content)
 
         # quantale_colimit_engine imports these transitively. Importing them a
         # second time duplicates PeTTa rewrite rules and can exhaust its stack.
