@@ -56,7 +56,7 @@ EXPECTED_COLIMIT_PROPS = {
     "dangerous":     0.2924,
     "bright":        0.2576,
     "red":           0.2840,
-    "expressive":    0.2889,
+    "expressive":    0.1539,
     "beautiful":     0.1862,
     "subjective":    0.1474,
     "abstract":      0.1152,
@@ -68,7 +68,7 @@ EXPECTED_REFINED_PROPS = {
     "dangerous":     0.3461,
     "bright":        0.3076,
     "red":           0.3369,
-    "expressive":    0.3423,
+    "expressive":    0.1887,
     "beautiful":     0.2265,
     "subjective":    0.1810,
     "abstract":      0.1427,
@@ -116,15 +116,15 @@ class TestColimitWithRealGNNData(unittest.TestCase):
         self.assertEqual(expressive_count, 1,
             "expressive must appear exactly once in the blend")
 
-    def test_expressive_tv_is_bounded_sum_of_sources(self):
+    def test_expressive_tv_is_lattice_maximum_of_sources(self):
         """
-        expressive join: min(0.1539 + 0.1350, 1.0) = 0.2889
-        The colimit q-join uses bounded sum for the TV component.
+        expressive join: max(0.1539, 0.1350) = 0.1539
+        The colimit q-join uses the lattice maximum for the TV component.
         """
         expressive_tv = self.blend.entries["expressive"].quantale.tv.value
-        expected = min(FIRE_PROPS["expressive"] + ART_PROPS["expressive"], 1.0)
+        expected = max(FIRE_PROPS["expressive"], ART_PROPS["expressive"])
         self.assertAlmostEqual(expressive_tv, expected, places=3,
-            msg=f"expressive TV should be bounded sum {expected:.4f}, "
+            msg=f"expressive TV should be lattice max {expected:.4f}, "
                 f"got {expressive_tv:.4f}")
 
     def test_unshared_properties_carry_through_unchanged(self):
