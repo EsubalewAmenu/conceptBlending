@@ -137,10 +137,73 @@ class TestMettaRunnerRuntime(unittest.TestCase):
             "quantale-blend-and-refine did not refine the generated colimit",
         )
         self.assertIn(
-            "(providesTransport (WorldSpecSet (W_FERRY W_COMMUTE)) 1.0)",
+            "(providesTransport (WorldSpecSet (W_FERRY W_COMMUTE)) 0.85)",
             output,
             "the combined operation did not return the expected joined property",
         )
+
+
+class TestMettaVEnrichedRuntime(unittest.TestCase):
+    """Execute the quantale-law and V-enriched contracts in PeTTa."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_v_enriched_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(tests_dir, "quantale_petta_enriched_smoke.metta")
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa V-enriched contracts failed:\nSTDOUT:\n{completed.stdout}\n"
+            f"STDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        # One True is emitted by import!, followed by thirteen contract results.
+        self.assertEqual(results, ["true"] * 14, completed.stdout)
+
+
+class TestMettaPerspectiveAwareVPredicateRuntime(unittest.TestCase):
+    """Check that PeTTa V-predicate transformations preserve perspective."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_perspective_aware_vpredicate_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(tests_dir, "quantale_petta_perspective_smoke.metta")
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa perspective-aware V-predicate contracts failed:\n"
+            f"STDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        self.assertEqual(results, ["true"] * 8, completed.stdout)
 
 if __name__ == "__main__":
     unittest.main()
