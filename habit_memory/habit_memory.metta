@@ -8,6 +8,14 @@
        ()
        (cons $blend (repeat-blend (- $count 1) $blend))))
 
+(= (property-names ())
+   ())
+(= (property-names (cons ($property-name $world-spec-set $degree) $remaining-properties))
+   (cons $property-name (property-names $remaining-properties)))
+
+(= (v-predicate-property-names $v-predicate)
+   (property-names (cdr-atom (car-atom (cdr-atom $v-predicate)))))
+
 (= (flatten-history-results ())
    ())
 (= (flatten-history-results (cons $entry $remaining-results))
@@ -16,60 +24,12 @@
        (flatten-history-results $remaining-results)))
 
 (= (source-historical-blend-results)
-   (append
-      (collapse
-         (match &self
-            (Concept $concept-name
-               (HabitCount $count)
-               (V-predicate
-                  (Property
-                     ($property-1 $world-spec-set-1 $degree-1))))
-            (repeat-blend $count ($property-1))))
-      (append
-         (collapse
-            (match &self
-               (Concept $concept-name
-                  (HabitCount $count)
-                  (V-predicate
-                     (Property
-                        ($property-1 $world-spec-set-1 $degree-1)
-                        ($property-2 $world-spec-set-2 $degree-2))))
-               (repeat-blend $count ($property-1 $property-2))))
-         (append
-            (collapse
-               (match &self
-                  (Concept $concept-name
-                     (HabitCount $count)
-                     (V-predicate
-                        (Property
-                           ($property-1 $world-spec-set-1 $degree-1)
-                           ($property-2 $world-spec-set-2 $degree-2)
-                           ($property-3 $world-spec-set-3 $degree-3))))
-                  (repeat-blend $count ($property-1 $property-2 $property-3))))
-            (append
-               (collapse
-                  (match &self
-                     (Concept $concept-name
-                        (HabitCount $count)
-                        (V-predicate
-                           (Property
-                              ($property-1 $world-spec-set-1 $degree-1)
-                              ($property-2 $world-spec-set-2 $degree-2)
-                              ($property-3 $world-spec-set-3 $degree-3)
-                              ($property-4 $world-spec-set-4 $degree-4))))
-                     (repeat-blend $count ($property-1 $property-2 $property-3 $property-4))))
-               (collapse
-                  (match &self
-                     (Concept $concept-name
-                        (HabitCount $count)
-                        (V-predicate
-                           (Property
-                              ($property-1 $world-spec-set-1 $degree-1)
-                              ($property-2 $world-spec-set-2 $degree-2)
-                              ($property-3 $world-spec-set-3 $degree-3)
-                              ($property-4 $world-spec-set-4 $degree-4)
-                              ($property-5 $world-spec-set-5 $degree-5))))
-                     (repeat-blend $count ($property-1 $property-2 $property-3 $property-4 $property-5)))))))))
+   (collapse
+      (match &self
+         (Concept $concept-name
+            (HabitCount $count)
+            $v-predicate)
+         (repeat-blend $count (v-predicate-property-names $v-predicate)))))
 
 (= (source-historical-blends)
    (flatten-history-results (source-historical-blend-results)))
