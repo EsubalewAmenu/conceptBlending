@@ -12,13 +12,15 @@
 ; (= (concept-1) (climbing webs venomous))
 ; (= (concept-2) (intelligence tools walking))
 
-(= (concept-1) (alpha beta))
-(= (concept-2) (gamma delta))
+; (= (concept-1) (alpha beta))
+; (= (concept-2) (gamma delta))
 
 ; Established Connection
 ;(= (concept-1) (intelligence climbing webs))
 ;(= (concept-2) (tools agility insects))
 
+(= (concept-1) (access_internet calculate_data compute_information do_word_processing))
+(= (concept-2) (drive_around_town travel_to_shops carrying_groceries))
 
 (= (main)
    (let* (($step-1 (println! (--- STEP 1: Initial Source Concepts Declared ---)))
