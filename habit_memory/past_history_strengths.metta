@@ -5,9 +5,11 @@
 
 (= (maybe-print-cross-connection $memory $prop-a $prop-b)
    (let $strength (get-habit-strength $memory $prop-a $prop-b)
-        (if (> $strength 0)
-            (println! (Established Connection: M_P $prop-a $prop-b = $strength))
-            ())))
+        (let* (($trace (println! (Checking Pair: $prop-a <-> $prop-b M_P = $strength)))
+               ($connection (if (> $strength 0)
+                                (println! (Established Connection: M_P $prop-a $prop-b = $strength))
+                                ())))
+           ())))
 
 (= (cross-connections-found-for-property $memory $prop-a ())
    False)
@@ -37,6 +39,7 @@
 
 (= (check-past-history-strengths $memory $concept-1 $concept-2)
    (let* (($step-3 (println! (--- STEP 3: Automated Past History Cross-Examination ---)))
+          ($explain (println! (Scanning every property in Concept 1 against every property in Concept 2)))
           ($cross (print-cross-connections $memory $concept-1 $concept-2))
           ($notice (if (cross-connections-found $memory $concept-1 $concept-2)
                        ()

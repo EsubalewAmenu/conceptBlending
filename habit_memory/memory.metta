@@ -61,3 +61,10 @@
       (webs (WorldSpecSet ()) 1.0)
       (insects (WorldSpecSet ()) 1.0)
       (sticky (WorldSpecSet ()) 1.0))))
+
+(Concept habit-access_internet-carrying_groceries
+  (HabitCount 2)
+  (V-predicate
+    (Property
+      (access_internet (WorldSpecSet ()) 1.0)
+      (carrying_groceries (WorldSpecSet ()) 1.0))))
