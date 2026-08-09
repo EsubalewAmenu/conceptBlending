@@ -1,6 +1,11 @@
 ; End-to-end runtime test for mcbride_runner.metta
 ; Tests native PeTTa dispatch of McBride optimization functions.
 
+; Imports are relative to this tests directory so the documented command
+; `petta mcbride_runner_runtime_test.metta` works from here. Load dependencies
+; explicitly because PeTTa resolves transitive import paths against the
+; process working directory rather than the imported file's directory.
+
 !(import! &self a_quantale_theoretic_approach/mcbride_petta/mcbride_runner)
 
 (= (Boat)
@@ -23,13 +28,13 @@
 ; Test 1: mcbride-emergence returns degree in valid range [0, 1]
 !(let* (($blend (q-vpredicate-colimit Amphibian (Boat) (Car) (TransportMappings)))
         ($emerg (q-degree (mcbride-emergence $blend (Boat) (Car)))))
-   (assertEqual (and (>= $emerg 0.0) (<= $emerg 1.0)) True))
+   (test (and (>= $emerg 0.0) (<= $emerg 1.0)) True))
 
 ; Test 2: quantale-blend-and-refine creates concept with properties
 !(let $refined (quantale-blend-and-refine Amphibian (Boat) (Car) (TransportMappings))
-   (assertEqual (v-concept-name $refined) Amphibian))
+   (test (v-concept-name $refined) Amphibian))
 
 ; Test 3: mcbride-refine produces non-empty blend result
 !(let* (($blend (q-vpredicate-colimit Amphibian (Boat) (Car) (TransportMappings)))
         ($refined (mcbride-refine $blend (Boat) (Car))))
-   (assertEqual (== (v-property-list $refined) ()) False))
+   (test (== (v-property-list $refined) ()) False))

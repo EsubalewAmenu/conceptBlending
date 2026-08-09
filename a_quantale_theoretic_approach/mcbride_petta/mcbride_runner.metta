@@ -11,9 +11,6 @@
 
 !(import! &self a_quantale_theoretic_approach/mcbride_petta/refinement_loop)
 
-(= (mcbride-default-eta)   0.05)
-(= (mcbride-default-steps) 20)
-
 ;; Public: refine with default hyperparameters using native PeTTa logic
 (= (mcbride-refine $blend $source-a $source-b)
    (q-mcbride-refine $blend $source-a $source-b))

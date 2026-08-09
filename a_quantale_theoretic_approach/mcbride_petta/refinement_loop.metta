@@ -10,28 +10,31 @@
 !(import! &self a_quantale_theoretic_approach/mcbride_petta/gradient_step)
 
 ;; Convergence threshold & default patience
+(= (mcbride-default-eta)   0.05)
+(= (mcbride-default-steps) 20)
 (= (mcbride-threshold) 0.0001)
 (= (mcbride-patience)  5)
 
-;; Base case: no steps remaining — return current blend
-(= (q-refine-loop $blend $source-a $source-b $eta 0 $patience $prev-sigma)
-   $blend)
+;; Native absolute difference keeps direct PeTTa execution self-contained.
+(= (q-abs-diff $a $b)
+   (if (>= $a $b)
+       (- $a $b)
+       (- $b $a)))
 
-;; Base case: patience exhausted — converged, return current blend
-(= (q-refine-loop $blend $source-a $source-b $eta $steps 0 $prev-sigma)
-   $blend)
-
-;; Recursive case: apply one gradient step, check convergence, continue
+;; Use a single guarded rule. Separate base-case equations also unify with the
+;; generic recursive equation in PeTTa and create an exponential result tree.
 (= (q-refine-loop $blend $source-a $source-b $eta $steps $patience $prev-sigma)
-   (let* (($next-blend   (q-gradient-step $blend $source-a $source-b $eta))
-          ($sigma-new    (q-emergence-tv $source-a $source-b $next-blend))
-          ($delta        (mcbride-py-abs-diff $sigma-new $prev-sigma))
-          ($converged    (< $delta (mcbride-threshold)))
-          ;; Decrease patience only when converging; leave it unchanged otherwise
-          ($new-patience (if $converged (- $patience 1) $patience)))
-      (q-refine-loop
-         $next-blend $source-a $source-b $eta
-         (- $steps 1) $new-patience $sigma-new)))
+   (if (or (<= $steps 0) (<= $patience 0))
+       $blend
+       (let* (($next-blend   (q-gradient-step $blend $source-a $source-b $eta))
+              ($sigma-new    (q-emergence-tv $source-a $source-b $next-blend))
+              ($delta        (q-abs-diff $sigma-new $prev-sigma))
+              ($converged    (< $delta (mcbride-threshold)))
+              ;; Decrease patience only when converging; leave it unchanged otherwise
+              ($new-patience (if $converged (- $patience 1) $patience)))
+          (q-refine-loop
+             $next-blend $source-a $source-b $eta
+             (- $steps 1) $new-patience $sigma-new))))
 
 ;; Public entry point with defaults
 (= (q-mcbride-refine $blend $source-a $source-b)

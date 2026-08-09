@@ -7,13 +7,27 @@
 
 !(import! &self a_quantale_theoretic_approach/mcbride_petta/mcbride_deriv)
 
-;; Update a single property: compute derivative, delegate TV step to Python
+;; Natural-gradient TV update. Keep this native so the module works when it
+;; is loaded directly by the `petta` CLI without Python atom registration.
+(= (q-clamp-tv $degree)
+   (if (< $degree 0.10)
+       0.10
+       (if (> $degree 0.99)
+           0.99
+           $degree)))
+
+(= (q-natural-gradient-tv-step $current-deg $deriv-tv $eta)
+   (q-clamp-tv
+      (+ $current-deg
+         (* $eta (* (* $current-deg (- 1.0 $current-deg)) $deriv-tv)))))
+
+;; Update a single property: compute derivative and apply the TV step.
 (= (q-update-property $prop-entry $source-a $source-b $blend $eta)
    (let* (($prop-name   (v-property-name $prop-entry))
           ($worlds      (v-property-worlds $prop-entry))
           ($current-deg (v-property-degree $prop-entry))
           ($deriv-tv    (q-mcbride-deriv-tv $prop-name $source-a $source-b $blend))
-          ($new-deg     (mcbride-py-tv-step $current-deg $deriv-tv $eta)))
+          ($new-deg     (q-natural-gradient-tv-step $current-deg $deriv-tv $eta)))
       ($prop-name (WorldSpecSet $worlds) $new-deg)))
 
 ;; Update all properties in a list
