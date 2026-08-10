@@ -13,9 +13,9 @@
 !(test (pair-count (memory-from-imported-history) climbing agility) 3)
 !(test (pair-count (memory-from-imported-history) climbing intelligence) 0)
 
-!(test (get-habit-strength (memory-from-imported-history) intelligence tools) 1)
-!(test (get-habit-strength (memory-from-imported-history) climbing agility) 1)
-!(test (get-habit-strength (memory-from-imported-history) climbing intelligence) 0)
+!(test (get-habit-strength (memory-from-imported-history) intelligence tools) 0.7846617209633034)
+!(test (get-habit-strength (memory-from-imported-history) climbing agility) 0.8173159351853961)
+!(test (get-habit-strength (memory-from-imported-history) climbing intelligence) 0.0)
 
 !(test (cross-connections-found (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking)) False)
 !(test (cross-connections-found (memory-from-imported-history) (intelligence climbing webs) (tools agility insects)) True)

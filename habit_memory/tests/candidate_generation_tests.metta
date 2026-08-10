@@ -32,10 +32,10 @@
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence))
        0.0)
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence agility tools))
-       2.0)
+       1.6019776561486996)
 
 !(test (candidate-generation-result (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
-       (candidate-result (webs intelligence) 0.0 (webs intelligence insects sticky tools) 4.0))
+       (candidate-result (webs intelligence) 0.0 (webs intelligence insects sticky tools) 3.4375944012236648))
 
 !(test (candidate-generation-result (memory-from-imported-history) (alpha beta) (gamma delta))
        (candidate-result (alpha delta) 0.0 (alpha delta) 0.0))

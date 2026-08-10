@@ -11,7 +11,9 @@
         (climbing agility balance)
         (climbing agility vertical)
         (climbing agility ropes)
-        (webs insects sticky)))
+        (webs insects sticky)
+        (access_internet carrying_groceries)
+        (access_internet carrying_groceries)))
 
 !(test (memory-properties (memory-from-imported-history))
-       (intelligence tools language strategy engineering logic climbing agility balance vertical ropes webs insects sticky))
+       (intelligence tools language strategy engineering logic climbing agility balance vertical ropes webs insects sticky access_internet carrying_groceries))

@@ -30,7 +30,7 @@
           (register-successful-blend (seed-memory-for-test) (climbing intelligence agility tools))
           climbing
           intelligence)
-       0.125)
+       0.0625)
 
 !(test (select-and-reinforce-winner-runtime
           (seed-memory-for-test)

@@ -109,6 +109,16 @@
                 0.0
                 (log-math 2 $ratio)))))
 
+(= (normalize-positive-pmi $pmi-score)
+   (if (<= $pmi-score 0)
+       0.0
+       (/ $pmi-score (+ 1 $pmi-score))))
+
+(= (combine-habit-strengths $jaccard-score $pmi-score)
+   (/ (+ $jaccard-score
+         (normalize-positive-pmi $pmi-score))
+      2))
+
 (= (property-count (decayed-habit-memory $gamma $memory) $property)
    (property-count $memory $property))
 
@@ -134,11 +144,16 @@
 (= (habit-strength-pmi (decayed-habit-memory $gamma $memory) $property-a $property-b)
    (* $gamma (habit-strength-pmi $memory $property-a $property-b)))
 
+(= (habit-strength-combined $memory $property-a $property-b)
+   (combine-habit-strengths
+      (habit-strength-jaccard $memory $property-a $property-b)
+      (habit-strength-pmi $memory $property-a $property-b)))
+
 (= (get-habit-strength (habit-memory $history) $property-a $property-b)
-   (habit-strength-jaccard (habit-memory $history) $property-a $property-b))
+   (habit-strength-combined (habit-memory $history) $property-a $property-b))
 
 (= (get-habit-strength (decayed-habit-memory $gamma $memory) $property-a $property-b)
-   (habit-strength-jaccard (decayed-habit-memory $gamma $memory) $property-a $property-b))
+   (habit-strength-combined (decayed-habit-memory $gamma $memory) $property-a $property-b))
 
 (= (append-all-blends ())
    ())

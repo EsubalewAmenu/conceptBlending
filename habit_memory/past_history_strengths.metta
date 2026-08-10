@@ -4,12 +4,14 @@
    (memory-from-imported-history))
 
 (= (maybe-print-cross-connection $memory $prop-a $prop-b)
-   (let $strength (get-habit-strength $memory $prop-a $prop-b)
-        (let* (($trace (println! (Checking Pair: $prop-a <-> $prop-b M_P = $strength)))
-               ($connection (if (> $strength 0)
+   (let* (($jaccard (habit-strength-jaccard $memory $prop-a $prop-b))
+          ($pmi (habit-strength-pmi $memory $prop-a $prop-b))
+          ($strength (get-habit-strength $memory $prop-a $prop-b))
+          ($trace (println! (Checking Pair: $prop-a <-> $prop-b Jaccard = $jaccard PMI = $pmi Combined M_P = $strength)))
+           ($connection (if (> $strength 0)
                                 (println! (Established Connection: M_P $prop-a $prop-b = $strength))
                                 ())))
-           ())))
+      ()))
 
 (= (cross-connections-found-for-property $memory $prop-a ())
    False)
