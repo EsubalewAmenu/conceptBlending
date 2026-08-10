@@ -25,12 +25,16 @@ class TestWeakness(unittest.TestCase):
         w = weakness(c, uniform_valuation)
         self.assertEqual(w.tv.value, 0.0)
 
-    def test_weakness_increases_with_more_properties(self):
+    def test_weakness_is_the_join_of_property_contributions(self):
         c1 = _make_concept("c1", {"p1": 0.8})
         c2 = _make_concept("c2", {"p1": 0.8, "p2": 0.6})
+        c3 = _make_concept("c3", {"p1": 0.8, "p2": 0.9})
         w1 = weakness(c1, uniform_valuation)
         w2 = weakness(c2, uniform_valuation)
-        self.assertGreater(w2.tv.value, w1.tv.value)
+        w3 = weakness(c3, uniform_valuation)
+        self.assertEqual(w2.tv.value, w1.tv.value)
+        self.assertGreater(w3.tv.value, w1.tv.value)
+        self.assertEqual(w3.tv.value, 0.9)
 
 class TestEmergence(unittest.TestCase):
     def test_blend_richer_than_sources_has_high_emergence(self):
