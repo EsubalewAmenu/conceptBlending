@@ -97,6 +97,18 @@
                 0.0
                 (/ $count-uv $denominator)))))
 
+(= (calculate-pmi-strength $count-u $count-v $count-uv $total-count)
+   (if (or (== $total-count 0)
+           (or (== $count-u 0)
+               (or (== $count-v 0)
+                   (== $count-uv 0))))
+       0.0
+       (let $ratio (/ (* $count-uv $total-count)
+                      (* $count-u $count-v))
+            (if (<= $ratio 1)
+                0.0
+                (log-math 2 $ratio)))))
+
 (= (property-count (decayed-habit-memory $gamma $memory) $property)
    (property-count $memory $property))
 
@@ -111,6 +123,16 @@
 
 (= (habit-strength-jaccard (decayed-habit-memory $gamma $memory) $property-a $property-b)
    (* $gamma (habit-strength-jaccard $memory $property-a $property-b)))
+
+(= (habit-strength-pmi (habit-memory $history) $property-a $property-b)
+   (calculate-pmi-strength
+      (property-count (habit-memory $history) $property-a)
+      (property-count (habit-memory $history) $property-b)
+      (pair-count (habit-memory $history) $property-a $property-b)
+      (list-length $history)))
+
+(= (habit-strength-pmi (decayed-habit-memory $gamma $memory) $property-a $property-b)
+   (* $gamma (habit-strength-pmi $memory $property-a $property-b)))
 
 (= (get-habit-strength (habit-memory $history) $property-a $property-b)
    (habit-strength-jaccard (habit-memory $history) $property-a $property-b))

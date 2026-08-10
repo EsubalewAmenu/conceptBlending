@@ -20,6 +20,12 @@
 !(test (property-count (memory-from-imported-history) tools) 4)
 !(test (pair-count (memory-from-imported-history) intelligence tools) 4)
 !(test (habit-strength-jaccard (memory-from-imported-history) intelligence tools) 1)
+!(test (habit-strength-pmi (habit-memory ((a b) (a b) (a c) (d e))) a b)
+       0.4150374992788437)
+!(test (habit-strength-pmi (habit-memory ((a b) (a c) (d e))) a e)
+       0.0)
+!(test (habit-strength-pmi (decayed-habit-memory 0.5 (habit-memory ((a b) (a b) (a c) (d e)))) a b)
+       0.20751874963942185)
 
 !(test (get-habit-strength
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))
