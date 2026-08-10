@@ -12,6 +12,20 @@
 !(test (generated-core-blend (climbing webs venomous) (intelligence tools walking))
        (climbing intelligence))
 
+!(test (generated-core-blends (climbing webs venomous) (intelligence tools walking))
+       ((climbing intelligence)
+        (climbing tools)
+        (climbing walking)
+        (venomous intelligence)
+        (venomous tools)
+        (venomous walking)
+        (webs intelligence)
+        (webs tools)
+        (webs walking)))
+
+!(test (best-core-blend (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
+       (webs intelligence))
+
 !(test (discover-extensions (memory-from-imported-history) (climbing intelligence))
        (agility tools))
 
@@ -21,7 +35,7 @@
        2.0)
 
 !(test (candidate-generation-result (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
-       (candidate-result (climbing intelligence) 0.0 (climbing intelligence agility tools) 2.0))
+       (candidate-result (webs intelligence) 0.0 (webs intelligence insects sticky tools) 4.0))
 
 !(test (candidate-generation-result (memory-from-imported-history) (alpha beta) (gamma delta))
        (candidate-result (alpha delta) 0.0 (alpha delta) 0.0))
