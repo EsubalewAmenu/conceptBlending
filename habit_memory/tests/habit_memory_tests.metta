@@ -13,11 +13,13 @@
         (climbing agility balance)
         (climbing agility vertical)
         (climbing agility ropes)
-        (webs insects sticky)))
+        (webs insects sticky)
+        (access_internet carrying_groceries)
+        (access_internet carrying_groceries)))
 
 !(test (property-count (memory-from-imported-history) tools) 4)
 !(test (pair-count (memory-from-imported-history) intelligence tools) 4)
-!(test (habit-strength-freq (memory-from-imported-history) intelligence tools) 1)
+!(test (habit-strength-jaccard (memory-from-imported-history) intelligence tools) 1)
 
 !(test (get-habit-strength
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))

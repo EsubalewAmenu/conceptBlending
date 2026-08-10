@@ -103,20 +103,20 @@
 (= (pair-count (decayed-habit-memory $gamma $memory) $property-a $property-b)
    (pair-count $memory $property-a $property-b))
 
-(= (habit-strength-freq (habit-memory $history) $property-a $property-b)
+(= (habit-strength-jaccard (habit-memory $history) $property-a $property-b)
    (calculate-jaccard-strength
       (property-count (habit-memory $history) $property-a)
       (property-count (habit-memory $history) $property-b)
       (pair-count (habit-memory $history) $property-a $property-b)))
 
-(= (habit-strength-freq (decayed-habit-memory $gamma $memory) $property-a $property-b)
-   (* $gamma (habit-strength-freq $memory $property-a $property-b)))
+(= (habit-strength-jaccard (decayed-habit-memory $gamma $memory) $property-a $property-b)
+   (* $gamma (habit-strength-jaccard $memory $property-a $property-b)))
 
 (= (get-habit-strength (habit-memory $history) $property-a $property-b)
-   (habit-strength-freq (habit-memory $history) $property-a $property-b))
+   (habit-strength-jaccard (habit-memory $history) $property-a $property-b))
 
 (= (get-habit-strength (decayed-habit-memory $gamma $memory) $property-a $property-b)
-   (habit-strength-freq (decayed-habit-memory $gamma $memory) $property-a $property-b))
+   (habit-strength-jaccard (decayed-habit-memory $gamma $memory) $property-a $property-b))
 
 (= (append-all-blends ())
    ())
