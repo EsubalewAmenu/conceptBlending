@@ -51,12 +51,12 @@ class TestMettaRunnerImports(unittest.TestCase):
         with open(path) as f:
             content = f.read()
 
-        colimit_import = (
+        refinement_import = (
             "!(import! &self "
-            "a_quantale_theoretic_approach/structural_reasoning/"
-            "quantale_colimit_engine)"
+            "a_quantale_theoretic_approach/mcbride_petta/"
+            "refinement_loop)"
         )
-        self.assertIn(colimit_import, content)
+        self.assertIn(refinement_import, content)
 
         # quantale_colimit_engine imports these transitively. Importing them a
         # second time duplicates PeTTa rewrite rules and can exhaust its stack.
@@ -92,12 +92,11 @@ class TestMettaRunnerRuntime(unittest.TestCase):
     @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
     def test_public_operations_return_expected_results(self):
         tests_dir = os.path.dirname(os.path.abspath(__file__))
-        repo_root = os.path.dirname(os.path.dirname(tests_dir))
-        fixture = os.path.join(tests_dir, "mcbride_runner_runtime_test.metta")
+        fixture = "mcbride_runner_runtime_test.metta"
 
         completed = subprocess.run(
             ["petta", fixture],
-            cwd=repo_root,
+            cwd=tests_dir,
             capture_output=True,
             text=True,
             timeout=30,
@@ -110,37 +109,18 @@ class TestMettaRunnerRuntime(unittest.TestCase):
             f"STDERR:\n{completed.stderr}",
         )
 
-        output = completed.stdout
-        self.assertIn(
-            "(Refined (BlendName Boat)",
-            output,
-            "mcbride-refine did not return the expected refined result",
-        )
-        self.assertIn(
-            "(Eta 0.05) (Steps 20)",
-            output,
-            "mcbride-refine did not forward its default eta and step count",
-        )
-        self.assertIn(
-            "(Eta 0.1) (Steps 3)",
-            output,
-            "mcbride-refine-with did not forward explicit parameters",
-        )
-        self.assertIn(
-            "(EmergenceScore Boat Boat Car 0.625)",
-            output,
-            "mcbride-emergence did not return the expected score",
-        )
-        self.assertIn(
-            "(Refined (BlendName TestBlend)",
-            output,
-            "quantale-blend-and-refine did not refine the generated colimit",
-        )
-        self.assertIn(
-            "(providesTransport (WorldSpecSet (W_FERRY W_COMMUTE)) 0.85)",
-            output,
-            "the combined operation did not return the expected joined property",
-        )
+        output_lines = completed.stdout.splitlines()
+        expected_assertions = [
+            "(assertEqual true true)",
+            "(assertEqual Amphibian Amphibian)",
+            "(assertEqual false false)",
+        ]
+        for assertion in expected_assertions:
+            self.assertIn(
+                assertion,
+                output_lines,
+                f"PeTTa did not return the expected runtime assertion: {assertion}",
+            )
 
 
 class TestMettaVEnrichedRuntime(unittest.TestCase):

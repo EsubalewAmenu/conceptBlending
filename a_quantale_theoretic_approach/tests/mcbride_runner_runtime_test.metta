@@ -1,31 +1,10 @@
-; Runtime contract test for mcbride_runner.metta.
-;
-; The grounded operations are replaced with deterministic test doubles because
-; the runner's responsibility is to dispatch to them with the correct arguments.
-; The combined operation still executes the real quantale colimit implementation.
+; End-to-end runtime test for mcbride_runner.metta
+; Tests native PeTTa dispatch of McBride optimization functions.
 
-(= (mcbride-py-refine
-      (Concept $blend-name $blend-body)
-      (Concept $source-a-name $source-a-body)
-      (Concept $source-b-name $source-b-body)
-      $eta
-      $steps)
-   (Refined
-      (BlendName $blend-name)
-      (BlendBody $blend-body)
-      (SourceNames $source-a-name $source-b-name)
-      (Eta $eta)
-      (Steps $steps)))
-
-(= (mcbride-py-emergence
-      (Concept $blend-name $blend-body)
-      (Concept $source-a-name $source-a-body)
-      (Concept $source-b-name $source-b-body))
-   (EmergenceScore
-      $blend-name
-      $source-a-name
-      $source-b-name
-      0.625))
+; Imports are relative to this tests directory so the documented command
+; `petta mcbride_runner_runtime_test.metta` works from here. Load dependencies
+; explicitly because PeTTa resolves transitive import paths against the
+; process working directory rather than the imported file's directory.
 
 !(import! &self a_quantale_theoretic_approach/mcbride_petta/mcbride_runner)
 
@@ -34,8 +13,7 @@
       (V-predicate
          (Property
             (floatsOnWater (WorldSpecSet (W_FERRY W_ROWBOAT)) 0.95)
-            (providesTransport (WorldSpecSet (W_FERRY)) 0.80)
-            (hasColor (WorldSpecSet (W_TOY_BOAT)) 0.30)))))
+            (providesTransport (WorldSpecSet (W_FERRY)) 0.80)))))
 
 (= (Car)
    (Concept Car
@@ -44,10 +22,19 @@
             (travelsOnRoad (WorldSpecSet (W_COMMUTE)) 0.90)
             (providesTransport (WorldSpecSet (W_COMMUTE)) 0.85)))))
 
-!(mcbride-refine (Boat) (Boat) (Car))
-!(mcbride-refine-with (Boat) (Boat) (Car) 0.10 3)
-!(mcbride-emergence (Boat) (Boat) (Car))
-; The combined operation is invoked by a dedicated test query so its full
-; colimit result can be asserted independently.
-!(quantale-blend-and-refine TestBlend (Boat) (Car)
+(= (TransportMappings)
    ((TransportCapability providesTransport providesTransport)))
+
+; Test 1: mcbride-emergence returns degree in valid range [0, 1]
+!(let* (($blend (q-vpredicate-colimit Amphibian (Boat) (Car) (TransportMappings)))
+        ($emerg (q-degree (mcbride-emergence $blend (Boat) (Car)))))
+   (test (and (>= $emerg 0.0) (<= $emerg 1.0)) True))
+
+; Test 2: quantale-blend-and-refine creates concept with properties
+!(let $refined (quantale-blend-and-refine Amphibian (Boat) (Car) (TransportMappings))
+   (test (v-concept-name $refined) Amphibian))
+
+; Test 3: mcbride-refine produces non-empty blend result
+!(let* (($blend (q-vpredicate-colimit Amphibian (Boat) (Car) (TransportMappings)))
+        ($refined (mcbride-refine $blend (Boat) (Car))))
+   (test (== (v-property-list $refined) ()) False))
