@@ -114,10 +114,11 @@
        0.0
        (/ $pmi-score (+ 1 $pmi-score))))
 
-(= (combine-habit-strengths $jaccard-score $pmi-score)
+(= (combine-habit-strengths $jaccard-score $pmi-score $embedding-score)
    (/ (+ $jaccard-score
-         (normalize-positive-pmi $pmi-score))
-      2))
+         (+ (normalize-positive-pmi $pmi-score)
+            $embedding-score))
+      3))
 
 (= (property-count (decayed-habit-memory $gamma $memory) $property)
    (property-count $memory $property))
@@ -147,7 +148,8 @@
 (= (habit-strength-combined $memory $property-a $property-b)
    (combine-habit-strengths
       (habit-strength-jaccard $memory $property-a $property-b)
-      (habit-strength-pmi $memory $property-a $property-b)))
+      (habit-strength-pmi $memory $property-a $property-b)
+      (habit-strength-embedding $property-a $property-b)))
 
 (= (get-habit-strength (habit-memory $history) $property-a $property-b)
    (habit-strength-combined (habit-memory $history) $property-a $property-b))

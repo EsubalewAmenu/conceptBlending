@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self memory) (empty))
+!(let $import-embeddings (import! &self embeddings) (empty))
 !(let $import-habit-memory (import! &self habit_memory) (empty))
 !(let $import-scoring (import! &self peircean_scoring) (empty))
 !(let $import-step-3 (import! &self past_history_strengths) (empty))
