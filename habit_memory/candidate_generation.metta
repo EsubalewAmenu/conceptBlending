@@ -47,9 +47,15 @@
         (best-scored-core-blend $memory (generated-core-blends $concept-1 $concept-2))
         $candidate))
 
-(= (print-core-blend-score $memory $core-blend)
-   (let $expanded-blend (unique-atom (append $core-blend (discover-extensions $memory $core-blend)))
-        (println! (Generated Core Pair: $core-blend Expanded Candidate: $expanded-blend Expanded Habit Bonus: (habit-bonus $memory $expanded-blend)))))
+(= (print-core-blend-score $memory ($property-a $property-b))
+   (let* (($core-blend ($property-a $property-b))
+          ($jaccard (habit-strength-jaccard $memory $property-a $property-b))
+          ($pmi (habit-strength-pmi $memory $property-a $property-b))
+          ($embedding (habit-strength-embedding $property-a $property-b))
+          ($combined (get-habit-strength $memory $property-a $property-b))
+          ($expanded-blend (unique-atom (append $core-blend (discover-extensions $memory $core-blend))))
+          ($expanded-bonus (habit-bonus $memory $expanded-blend)))
+      (println! (Generated Core Pair: $core-blend Jaccard = $jaccard PMI = $pmi Embedding = $embedding Combined M_P = $combined Expanded Candidate: $expanded-blend Expanded Habit Bonus: $expanded-bonus))))
 
 (= (print-core-blend-scores $memory ())
    ())
