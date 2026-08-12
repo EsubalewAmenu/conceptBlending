@@ -1,6 +1,30 @@
 ; Static property embeddings for semantic similarity experiments.
 ; These small local vectors are placeholders for Step 1 only.
 
+(= (dot-product () ())
+   0.0)
+(= (dot-product (cons $value-a $rest-a) (cons $value-b $rest-b))
+   (+ (* $value-a $value-b)
+      (dot-product $rest-a $rest-b)))
+
+(= (sum-squares ())
+   0.0)
+(= (sum-squares (cons $value $rest))
+   (+ (* $value $value)
+      (sum-squares $rest)))
+
+(= (vector-norm $vector)
+   (sqrt-math (sum-squares $vector)))
+
+(= (cosine-similarity $vector-a $vector-b)
+   (let* (($norm-a (vector-norm $vector-a))
+          ($norm-b (vector-norm $vector-b)))
+      (if (or (== $norm-a 0.0)
+              (== $norm-b 0.0))
+          0.0
+          (/ (dot-product $vector-a $vector-b)
+             (* $norm-a $norm-b)))))
+
 (= (property-embedding access_internet) (0.90 0.80 0.10))
 (= (property-embedding calculate_data) (0.85 0.90 0.20))
 (= (property-embedding compute_information) (0.88 0.86 0.18))
