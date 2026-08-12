@@ -23,6 +23,24 @@
 (= (ve-morphism-target (VMorphism $name $source $target $object-map)) $target)
 (= (ve-morphism-object-map (VMorphism $name $source $target $object-map)) $object-map)
 
+(= (ve-cocone-name
+      (VCocone $name $generic-to-left $generic-to-right $left-to-apex $right-to-apex))
+   $name)
+(= (ve-cocone-generic-to-left
+      (VCocone $name $generic-to-left $generic-to-right $left-to-apex $right-to-apex))
+   $generic-to-left)
+(= (ve-cocone-generic-to-right
+      (VCocone $name $generic-to-left $generic-to-right $left-to-apex $right-to-apex))
+   $generic-to-right)
+(= (ve-cocone-left-to-apex
+      (VCocone $name $generic-to-left $generic-to-right $left-to-apex $right-to-apex))
+   $left-to-apex)
+(= (ve-cocone-right-to-apex
+      (VCocone $name $generic-to-left $generic-to-right $left-to-apex $right-to-apex))
+   $right-to-apex)
+(= (ve-cocone-apex $cocone)
+   (ve-morphism-target (ve-cocone-left-to-apex $cocone)))
+
 (= (ve-profunctor-name (VProfunctor $name $source $target $values)) $name)
 (= (ve-profunctor-source (VProfunctor $name $source $target $values)) $source)
 (= (ve-profunctor-target (VProfunctor $name $source $target $values)) $target)
@@ -251,6 +269,14 @@
              $after))
        (VError IncompatibleMorphismComposition)))
 
+(= (ve-vmorphism-same-map $first $second)
+   (if (== (ve-morphism-source $first) (ve-morphism-source $second))
+       (if (== (ve-morphism-target $first) (ve-morphism-target $second))
+           (== (ve-morphism-object-map $first)
+               (ve-morphism-object-map $second))
+           False)
+       False))
+
 (= (ve-cocone-object-commutes $object $generic-to-left $generic-to-right $left-to-apex $right-to-apex)
    (== (ve-map-object $left-to-apex (ve-map-object $generic-to-left $object))
        (ve-map-object $right-to-apex (ve-map-object $generic-to-right $object))))
@@ -391,7 +417,7 @@
               False)
           False)))
 
-(= (ve-profunctor-coend-value $source-object $target-object $middles $first $after)
+(= (ve-coend-fold $source-object $target-object $middles $first $after)
    (if (== $middles ())
        (q-bottom)
        (let* (($middle (car-atom $middles))
@@ -399,16 +425,45 @@
               ($head-value (q-tensor
                  (ve-profunctor-value $first $source-object $middle)
                  (ve-profunctor-value $after $middle $target-object)))
-              ($tail-value (ve-profunctor-coend-value
+              ($tail-value (ve-coend-fold
                  $source-object $target-object $tail $first $after)))
           (q-join $head-value $tail-value))))
+
+; Public finite enriched coend:
+;   (after o first)(a,c) = join_b first(a,b) tensor after(b,c)
+; Both profunctors and both requested endpoints are validated before folding.
+(= (ve-coend $source-object $target-object $first $after)
+   (if (ve-vprofunctor-valid $first)
+       (if (ve-vprofunctor-valid $after)
+           (if (== (ve-profunctor-target $first)
+                   (ve-profunctor-source $after))
+               (if (ve-object-member
+                      $source-object
+                      (ve-category-objects (ve-profunctor-source $first)))
+                   (if (ve-object-member
+                          $target-object
+                          (ve-category-objects (ve-profunctor-target $after)))
+                       (ve-coend-fold
+                          $source-object $target-object
+                          (ve-category-objects (ve-profunctor-target $first))
+                          $first $after)
+                       (VError UnknownCoendTarget $target-object))
+                   (VError UnknownCoendSource $source-object))
+               (VError IncompatibleProfunctorComposition))
+           (VError InvalidAfterProfunctor))
+       (VError InvalidFirstProfunctor)))
+
+; Compatibility alias retained for existing callers that supply the middle
+; object list explicitly. New code should use ve-coend.
+(= (ve-profunctor-coend-value $source-object $target-object $middles $first $after)
+   (ve-coend-fold $source-object $target-object $middles $first $after))
 
 (= (ve-profunctor-compose-target-values $source-object $targets $middles $first $after)
    (if (== $targets ())
        ()
        (let* (($target-object (car-atom $targets))
               ($tail (cdr-atom $targets))
-              ($value (ve-profunctor-coend-value
+              ($value (ve-coend-fold
                  $source-object $target-object $middles $first $after))
               ($tail-values (ve-profunctor-compose-target-values
                  $source-object $tail $middles $first $after)))
@@ -426,17 +481,21 @@
           (union-atom $head-values $tail-values))))
 
 (= (ve-vprofunctor-compose $name $first $after)
-   (if (== (ve-profunctor-target $first) (ve-profunctor-source $after))
-       (VProfunctor $name
-          (ve-profunctor-source $first)
-          (ve-profunctor-target $after)
-          (ve-profunctor-compose-values
-             (ve-category-objects (ve-profunctor-source $first))
-             (ve-category-objects (ve-profunctor-target $after))
-             (ve-category-objects (ve-profunctor-target $first))
-             $first
-             $after))
-       (VError IncompatibleProfunctorComposition)))
+   (if (ve-vprofunctor-valid $first)
+       (if (ve-vprofunctor-valid $after)
+           (if (== (ve-profunctor-target $first) (ve-profunctor-source $after))
+               (VProfunctor $name
+                  (ve-profunctor-source $first)
+                  (ve-profunctor-target $after)
+                  (ve-profunctor-compose-values
+                     (ve-category-objects (ve-profunctor-source $first))
+                     (ve-category-objects (ve-profunctor-target $after))
+                     (ve-category-objects (ve-profunctor-target $first))
+                     $first
+                     $after))
+               (VError IncompatibleProfunctorComposition))
+           (VError InvalidAfterProfunctor))
+       (VError InvalidFirstProfunctor)))
 
 (= (ve-profunctor-identity-target-values $source-object $targets $category)
    (if (== $targets ())
@@ -463,3 +522,204 @@
          (ve-category-objects $category)
          (ve-category-objects $category)
          $category)))
+
+; Companion of F : A -> C, with F_*(a,c) = C(Fa,c).
+(= (ve-companion-target-values $source-object $targets $morphism)
+   (if (== $targets ())
+       ()
+       (let* (($target-object (car-atom $targets))
+              ($tail (cdr-atom $targets))
+              ($value (ve-category-hom
+                 (ve-morphism-target $morphism)
+                 (ve-map-object $morphism $source-object)
+                 $target-object))
+              ($tail-values
+                 (ve-companion-target-values
+                    $source-object $tail $morphism)))
+          (cons-atom ($source-object $target-object $value) $tail-values))))
+
+(= (ve-companion-values $sources $targets $morphism)
+   (if (== $sources ())
+       ()
+       (let* (($source-object (car-atom $sources))
+              ($tail (cdr-atom $sources))
+              ($head-values
+                 (ve-companion-target-values
+                    $source-object $targets $morphism))
+              ($tail-values
+                 (ve-companion-values $tail $targets $morphism)))
+          (union-atom $head-values $tail-values))))
+
+(= (ve-vmorphism-companion $name $morphism)
+   (if (ve-vmorphism-valid $morphism)
+       (VProfunctor $name
+          (ve-morphism-source $morphism)
+          (ve-morphism-target $morphism)
+          (ve-companion-values
+             (ve-category-objects (ve-morphism-source $morphism))
+             (ve-category-objects (ve-morphism-target $morphism))
+             $morphism))
+       (VError InvalidCompanionMorphism)))
+
+; Conjoint of F : A -> C, with F^*(c,a) = C(c,Fa).
+(= (ve-conjoint-target-values $source-object $targets $morphism)
+   (if (== $targets ())
+       ()
+       (let* (($target-object (car-atom $targets))
+              ($tail (cdr-atom $targets))
+              ($value (ve-category-hom
+                 (ve-morphism-target $morphism)
+                 $source-object
+                 (ve-map-object $morphism $target-object)))
+              ($tail-values
+                 (ve-conjoint-target-values
+                    $source-object $tail $morphism)))
+          (cons-atom ($source-object $target-object $value) $tail-values))))
+
+(= (ve-conjoint-values $sources $targets $morphism)
+   (if (== $sources ())
+       ()
+       (let* (($source-object (car-atom $sources))
+              ($tail (cdr-atom $sources))
+              ($head-values
+                 (ve-conjoint-target-values
+                    $source-object $targets $morphism))
+              ($tail-values
+                 (ve-conjoint-values $tail $targets $morphism)))
+          (union-atom $head-values $tail-values))))
+
+(= (ve-vmorphism-conjoint $name $morphism)
+   (if (ve-vmorphism-valid $morphism)
+       (VProfunctor $name
+          (ve-morphism-target $morphism)
+          (ve-morphism-source $morphism)
+          (ve-conjoint-values
+             (ve-category-objects (ve-morphism-target $morphism))
+             (ve-category-objects (ve-morphism-source $morphism))
+             $morphism))
+       (VError InvalidConjointMorphism)))
+
+; Explicit relative V-colimit certificate.
+;
+; (VColimit Name Cocone (MediatingWitnesses ...) (ComparisonScope (...) Exhaustive))
+; Each supplied comparison cocone must have exactly one witness mediator. The
+; Exhaustive marker is an explicit contract from the comparison-cocone producer.
+
+(= (ve-vcolimit-name
+      (VColimit $name $cocone $witnesses $scope))
+   $name)
+(= (ve-vcolimit-cocone
+      (VColimit $name $cocone $witnesses $scope))
+   $cocone)
+(= (ve-vcolimit-witnesses
+      (VColimit $name $cocone (MediatingWitnesses $witnesses) $scope))
+   $witnesses)
+(= (ve-vcolimit-comparisons
+      (VColimit $name $cocone $witnesses
+         (ComparisonScope $comparisons Exhaustive)))
+   $comparisons)
+
+(= (ve-cocones-share-diagram $first $second)
+   (if (ve-vmorphism-same-map
+          (ve-cocone-generic-to-left $first)
+          (ve-cocone-generic-to-left $second))
+       (ve-vmorphism-same-map
+          (ve-cocone-generic-to-right $first)
+          (ve-cocone-generic-to-right $second))
+       False))
+
+(= (ve-mediator-leg-commutes $objects $candidate-leg $comparison-leg $mediator)
+   (if (== $objects ())
+       True
+       (let* (($object (car-atom $objects))
+              ($tail (cdr-atom $objects))
+              ($candidate-image (ve-map-object $candidate-leg $object))
+              ($mediated-image (ve-map-object $mediator $candidate-image))
+              ($comparison-image (ve-map-object $comparison-leg $object)))
+          (if (== $mediated-image $comparison-image)
+              (ve-mediator-leg-commutes
+                 $tail $candidate-leg $comparison-leg $mediator)
+              False))))
+
+(= (ve-mediator-valid $candidate $comparison $mediator)
+   (if (ve-vmorphism-valid $mediator)
+       (if (== (ve-morphism-source $mediator) (ve-cocone-apex $candidate))
+           (if (== (ve-morphism-target $mediator) (ve-cocone-apex $comparison))
+               (if (ve-mediator-leg-commutes
+                      (ve-category-objects
+                         (ve-morphism-source
+                            (ve-cocone-left-to-apex $candidate)))
+                      (ve-cocone-left-to-apex $candidate)
+                      (ve-cocone-left-to-apex $comparison)
+                      $mediator)
+                   (ve-mediator-leg-commutes
+                      (ve-category-objects
+                         (ve-morphism-source
+                            (ve-cocone-right-to-apex $candidate)))
+                      (ve-cocone-right-to-apex $candidate)
+                      (ve-cocone-right-to-apex $comparison)
+                      $mediator)
+                   False)
+               False)
+           False)
+       False))
+
+(= (ve-witness-count $comparison $candidate $witnesses)
+   (if (== $witnesses ())
+       0
+       (let* (($head (car-atom $witnesses))
+              ($tail (cdr-atom $witnesses))
+              ((MediatingWitness $head-comparison $mediator) $head)
+              ($tail-count
+                 (ve-witness-count $comparison $candidate $tail)))
+          (if (== $head-comparison $comparison)
+              (if (ve-mediator-valid $candidate $comparison $mediator)
+                  (+ 1 $tail-count)
+                  $tail-count)
+              $tail-count))))
+
+(= (ve-witness-entry-valid $entry $candidate $comparisons)
+   (let (MediatingWitness $comparison $mediator) $entry
+      (if (q-list-member $comparison $comparisons)
+          (ve-mediator-valid $candidate $comparison $mediator)
+          False)))
+
+(= (ve-witnesses-valid $witnesses $candidate $comparisons)
+   (if (== $witnesses ())
+       True
+       (if (ve-witness-entry-valid
+              (car-atom $witnesses) $candidate $comparisons)
+           (ve-witnesses-valid
+              (cdr-atom $witnesses) $candidate $comparisons)
+           False)))
+
+(= (ve-comparisons-have-unique-mediators
+      $comparisons $candidate $witnesses)
+   (if (== $comparisons ())
+       True
+       (let* (($comparison (car-atom $comparisons))
+              ($tail (cdr-atom $comparisons)))
+          (if (ve-vcocone-valid $comparison)
+              (if (ve-cocones-share-diagram $candidate $comparison)
+                  (if (== (ve-witness-count
+                             $comparison $candidate $witnesses) 1)
+                      (ve-comparisons-have-unique-mediators
+                         $tail $candidate $witnesses)
+                      False)
+                  False)
+              False))))
+
+(= (ve-vcolimit-valid
+      (VColimit $name $candidate
+         (MediatingWitnesses $witnesses)
+         (ComparisonScope $comparisons Exhaustive)))
+   (if (ve-vcocone-valid $candidate)
+       (if (== $comparisons ())
+           False
+           (if (ve-list-unique $comparisons)
+               (if (ve-witnesses-valid $witnesses $candidate $comparisons)
+                   (ve-comparisons-have-unique-mediators
+                      $comparisons $candidate $witnesses)
+                   False)
+               False))
+       False))

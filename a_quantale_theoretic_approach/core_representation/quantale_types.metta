@@ -44,6 +44,9 @@
 (= (q-tv-join $x $y)
    (max-atom ($x $y)))
 
+(= (q-tv-meet $x $y)
+   (min-atom ($x $y)))
+
 (= (q-tv-residuation $a $b)
    (if (== $a 0.0)
        1.0
@@ -56,6 +59,11 @@
 (= (q-join (Q $worlds-a $degree-a) (Q $worlds-b $degree-b))
    (Q (unique-atom (union-atom $worlds-a $worlds-b))
       (q-tv-join $degree-a $degree-b)))
+
+; Lattice meet, used for universally quantified enriched conditions.
+(= (q-meet (Q $worlds-a $degree-a) (Q $worlds-b $degree-b))
+   (Q (intersection-atom $worlds-a $worlds-b)
+      (q-tv-meet $degree-a $degree-b)))
 
 (= (q-residuation (Q $worlds-a $degree-a) (Q $worlds-b $degree-b) $universe)
    (Q (unique-atom (union-atom $worlds-b (q-difference $universe $worlds-a)))
