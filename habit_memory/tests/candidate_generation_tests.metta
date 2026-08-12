@@ -31,12 +31,12 @@
        (agility balance vertical ropes tools language strategy engineering logic))
 
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence))
-       0.1694826795768388)
+       0.1525344116191549)
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence agility tools))
-       2.5186626778623857)
+       2.4667964100761477)
 
 !(test (candidate-generation-result (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
-       (candidate-result (climbing intelligence) 0.1694826795768388 (climbing intelligence agility balance vertical ropes tools language strategy engineering logic) 19.264457786593184))
+       (candidate-result (climbing intelligence) 0.1525344116191549 (climbing intelligence agility balance vertical ropes tools language strategy engineering logic) 17.938012007933867))
 
 !(test (candidate-generation-result (memory-from-imported-history) (alpha beta) (gamma delta))
        (candidate-result (alpha delta) 0.0 (alpha delta) 0.0))

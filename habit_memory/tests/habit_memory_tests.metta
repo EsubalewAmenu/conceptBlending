@@ -38,7 +38,7 @@
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))
           climbing
           intelligence)
-       0.21114934624350545)
+       0.20253441161915492)
 
 !(test (reinforce-nondominated-blends
           (new-habit-memory)
@@ -52,4 +52,4 @@
           (apply-habit-decay (memory-from-imported-history) 0.9)
           intelligence
           tools)
-       0.8111886797823962)
+       0.8200698118041565)

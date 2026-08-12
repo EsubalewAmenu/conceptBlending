@@ -15,32 +15,32 @@
           0.8
           0.5
           0.2)
-       0.5706377124154997)
+       0.5735739411739498)
 
 !(test (habit-weighted-weakness
           (memory-from-imported-history)
           0.2
           ((intelligence tools 0.8 0.5)
            (climbing intelligence 0.4 0.5)))
-       0.8045342483308674)
+       0.8040808234977808)
 
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence agility tools))
-       2.5186626778623857)
+       2.4667964100761477)
 
 !(test (weighted-habit-bonus-pairs
           (memory-from-imported-history)
           ((intelligence tools 0.8)
            (climbing agility 0.7)))
-       1.296620409658252)
+       1.3169583686924269)
 
 !(test (habit-break-pair (memory-from-imported-history) climbing intelligence 0.7)
-       0.5813621242962128)
+       0.5932259118665915)
 
 !(test (habit-break
           (memory-from-imported-history)
           ((climbing intelligence 0.7)
            (intelligence tools 0.5)))
-       0.6547678432574637)
+       0.6592910589317171)
 
 !(test (peircean-blend-quality 0.6 2.0 0.7 0.5)
        1.3399999999999999)
@@ -51,4 +51,4 @@
           ((climbing intelligence 0.7))
           0.6
           0.5)
-       1.627470031576674)
+       1.5987230284190068)

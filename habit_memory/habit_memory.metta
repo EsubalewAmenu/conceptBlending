@@ -114,12 +114,15 @@
        0.0
        (/ $pmi-score (+ 1 $pmi-score))))
 
+; Habit-strength metric weights.
+; Tune these to change how M_P balances historical co-occurrence,
+; statistical association, and semantic similarity.
 (= (habit-strength-jaccard-weight)
-   1.0)
+   0.4)
 (= (habit-strength-pmi-weight)
-   1.0)
+   0.3)
 (= (habit-strength-embedding-weight)
-   1.0)
+   0.3)
 
 (= (combine-weighted-habit-strengths
       $jaccard-score

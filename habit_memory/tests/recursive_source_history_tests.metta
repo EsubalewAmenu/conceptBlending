@@ -25,7 +25,7 @@
        (p1 p2 p3 p4 p5 p6))
 
 !(test (get-habit-strength (memory-from-imported-history) p1 p6)
-       0.5736856847829567)
+       0.616317116304661)
 
 !(test (property-count (memory-from-imported-history) p1)
        2)
