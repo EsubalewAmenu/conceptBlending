@@ -25,6 +25,19 @@
           (/ (dot-product $vector-a $vector-b)
              (* $norm-a $norm-b)))))
 
+(= (property-embedding-results $property)
+   (collapse (match &self (= (property-embedding $property) $embedding) $embedding)))
+
+(= (habit-strength-embedding $property-a $property-b)
+   (let* (($embedding-results-a (property-embedding-results $property-a))
+          ($embedding-results-b (property-embedding-results $property-b)))
+      (if (or (== $embedding-results-a ())
+              (== $embedding-results-b ()))
+          0.0
+          (cosine-similarity
+             (car-atom $embedding-results-a)
+             (car-atom $embedding-results-b)))))
+
 (= (property-embedding access_internet) (0.90 0.80 0.10))
 (= (property-embedding calculate_data) (0.85 0.90 0.20))
 (= (property-embedding compute_information) (0.88 0.86 0.18))

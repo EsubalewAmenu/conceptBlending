@@ -27,3 +27,18 @@
           (property-embedding access_internet)
           (property-embedding calculate_data))
        0.9932641140158293)
+
+!(test (property-embedding-results access_internet)
+       ((0.90 0.80 0.10)))
+
+!(test (property-embedding-results unknown_property)
+       ())
+
+!(test (habit-strength-embedding access_internet calculate_data)
+       0.9932641140158293)
+
+!(test (habit-strength-embedding access_internet carrying_groceries)
+       0.4340919344816631)
+
+!(test (habit-strength-embedding access_internet unknown_property)
+       0.0)
