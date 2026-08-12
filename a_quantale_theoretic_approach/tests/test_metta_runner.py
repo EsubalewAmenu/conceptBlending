@@ -219,8 +219,84 @@ class TestMettaEnrichedOptimalityRuntime(unittest.TestCase):
             for line in completed.stdout.splitlines()
             if line.strip().lower() in {"true", "false"}
         ]
-        # One import result, followed by twenty-three contract results.
-        self.assertEqual(results, ["true"] * 24, completed.stdout)
+        # One import result, followed by twenty-eight contract results.
+        self.assertEqual(results, ["true"] * 29, completed.stdout)
+
+
+class TestMettaOptimalityIntegrationRuntime(unittest.TestCase):
+    """Exercise the staged structural/colimit/optimality data contract."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_optimality_integration_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(
+            tests_dir, "quantale_petta_optimality_integration_smoke.metta"
+        )
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa optimality integration contracts failed:\n"
+            f"STDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        # One import result, followed by nine integration contract results.
+        self.assertEqual(results, ["true"] * 10, completed.stdout)
+
+
+class TestMettaCompleteBlendPipelineRuntime(unittest.TestCase):
+    """Run structural generalization, quantale colimit, and optimality together."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_complete_blend_pipeline_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(
+            tests_dir, "quantale_petta_complete_pipeline_smoke.metta"
+        )
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "GENERALIZATION_LLM_MODE": "off",
+                "GENERALIZATION_CACHE_MODE": "on",
+            }
+        )
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa complete pipeline failed:\n"
+            f"STDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        # One import result, followed by pending/blocked/evaluated checks.
+        self.assertEqual(results, ["true"] * 4, completed.stdout)
 
 
 class TestMettaPerspectiveAwareVPredicateRuntime(unittest.TestCase):

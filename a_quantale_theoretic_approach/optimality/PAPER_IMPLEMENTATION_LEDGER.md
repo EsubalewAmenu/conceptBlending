@@ -103,7 +103,7 @@ checker does not claim to enumerate every small V-category internally.
 
 ## Enriched optimality context
 
-The complete evaluator accepts:
+The legacy spelling remains accepted:
 
 ```metta
 (VOptimalityContext
@@ -115,10 +115,66 @@ The complete evaluator accepts:
    PropertyEvidence RelevanceEvidence)
 ```
 
+It is normalized into `VOptimalityInputs`, validated once, and materialized as:
+
+```metta
+(VSharedOptimalityContext
+   Perspective Universe Candidate VColimit
+   SourceRelationsA SourceRelationsB BlendRelations
+   TransportedRelationsA TransportedRelationsB
+   CrossSpaceCorrespondences
+   GenericToA GenericToB AToBlend BToBlend
+   BlendToA BlendToB
+   PropertyEvidence RelevanceEvidence)
+```
+
+`q-build-optimality-context` checks candidate/family perspective agreement,
+candidate/quantale universe agreement, all required V-morphisms, and every
+generic/source/blend category endpoint. It computes each source relation family's
+companion/conjoint double-coend transport exactly once. Topology and Web consume
+these cached families, so both constraints inspect the same mathematical transport.
+
 It returns `VOptimalityResult Evaluated` and the tensor product only when all seven
 implemented checks are evaluated. Any absent Hom map, relation family, reconstruction,
 provenance, relevance evidence, or colimit certificate makes the aggregate `Blocked` with
 quantale bottom.
+
+## Staged pipeline integration
+
+`optimality/OptimalityIntegration.metta` consumes the existing producer records:
+
+```metta
+(structural-blend-preparation ...)
+(QuantaleVPredicateColimitResult ... (Blend Candidate) ...)
+(OptimalityEnrichmentArtifacts
+   VColimit SourceRelationsA SourceRelationsB BlendRelations
+   CrossSpaceCorrespondences
+   GenericToA GenericToB AToBlend BToBlend
+   BlendToA BlendToB PropertyEvidence RelevanceEvidence)
+```
+
+The adapter checks that the structural generic concept and perspective equal the
+colimit candidate's name and perspective, constructs the shared context, and invokes
+the completed evaluator. Missing enrichment artifacts, mismatched producer records,
+or invalid category endpoints return `OptimalityIntegrationResult Blocked` with
+quantale bottom and a specific reason.
+
+When explicit `PropertyEvidence` is absent, the adapter derives Good Reason evidence
+from the colimit result's `PropertyContributionMap`. Explicit property evidence remains
+available for provenance contributed by the generic-space or another producer.
+
+This is intentionally a staged data boundary. It does not import and rerun the
+V-predicate extraction, generalization, or colimit engines in the same PeTTa session.
+Their results can be cached and passed as inert records without duplicate transitive
+imports. The future Hom extraction/building pipeline owns construction of
+`OptimalityEnrichmentArtifacts`; until it supplies them, integration correctly blocks.
+
+For executable whole-pipeline validation, `integration/CompleteBlendPipeline.metta`
+does run the cached Cartesian generalizer, the world-aware quantale colimit, and
+the enriched optimality evaluator in one PeTTa call. Its contract consumes the
+compact V-predicate extractor output plus the later GNN scalar assignment. The
+runtime fixture verifies that absent scalars are `Pending`, absent enriched-Hom
+artifacts are `Blocked`, and complete evidence is `Evaluated`.
 
 ## Runtime data contracts
 
@@ -164,7 +220,7 @@ The operation validates both profunctors, their common middle category, and both
 Malformed input returns a specific `VError`; valid input returns one `Q` value. Full matrix
 composition remains available through `ve-vprofunctor-compose`.
 
-## Dependencies for the next implementation pass
+## External evidence still required at runtime
 
 Vital-relation preservation and the Hom-based constraints must consume, rather than invent:
 
@@ -174,5 +230,7 @@ Vital-relation preservation and the Hom-based constraints must consume, rather t
 - source and blend vital-relation families, scoped by perspective;
 - contribution provenance from V-predicate extraction and colimit construction.
 
-The optimality module may validate and aggregate these inputs, but it must not silently
-replace absent Homs or relations with semantic-name similarity.
+The optimality module validates and aggregates these inputs, but does not silently
+replace absent Homs or relations with semantic-name similarity. The staged adapter now
+enforces that contract; Hom/relation generation itself remains a separate planned
+component.

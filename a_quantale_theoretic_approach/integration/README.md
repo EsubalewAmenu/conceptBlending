@@ -39,3 +39,81 @@ already-computed producer result with `repr (reduce ...)`:
 producer expressions. The integration layer does not duplicate generic-space
 cache lookup, Cartesian planning, pair resolution, or persistence; these remain
 owned by `main-lcg` and the generalization component.
+
+## Optimality handoff
+
+After truth scalars, enriched Homs, vital relations, and a V-colimit certificate
+are available, pass the already computed structural and colimit records to
+`optimality/OptimalityIntegration.metta`:
+
+```metta
+!(import! &self a_quantale_theoretic_approach/optimality/OptimalityIntegration)
+!(q-evaluate-integrated-optimality
+    StructuralPreparation
+    QuantaleVPredicateColimitResult
+    OptimalityEnrichmentArtifacts)
+```
+
+The adapter verifies concept name, perspective, quantale universe, V-category,
+and V-morphism endpoint compatibility. It builds one shared optimality context,
+including the cached double-coend transports used by Topology and Web. If the Hom
+extraction/building stage has not supplied `OptimalityEnrichmentArtifacts`, the
+result is `Blocked` with bottom rather than a fabricated passing value.
+
+Good Reason provenance is derived automatically from the colimit result's
+`PropertyContributionMap` when the artifacts carry an empty property-evidence list.
+An explicit list can still be supplied when generic-space or external provenance
+must be included.
+
+This boundary accepts inert producer records deliberately: importing all producer
+engines into one PeTTa atomspace causes duplicate transitive imports and prevents
+the stages from being independently cached or inspected.
+
+## Executable complete pipeline
+
+`CompleteBlendPipeline.metta` is the executable orchestration facade. Its public
+operation is:
+
+```metta
+(q-run-complete-blend-pipeline
+   GenericName Perspective
+   CompactSourceVPredicateA CompactSourceVPredicateB
+   SourceAlgebraicSpecA SourceAlgebraicSpecB
+   ScalarBearingSourceVPredicateA ScalarBearingSourceVPredicateB
+   PropertyMappings WorldClusters WorldSpecRegistry
+   OptimalityEnrichmentArtifacts)
+```
+
+One invocation performs, in order:
+
+1. real cached Cartesian generic-space construction through `main-lcg`;
+2. the real world-aware quantale V-predicate colimit;
+3. structural/colimit identity and perspective checks;
+4. shared optimality-context construction and cached double-coend transports;
+5. all enriched optimality constraints and their aggregate score.
+
+The two V-predicate forms are intentional. The compact values are exactly the
+output contract of `v-predicate-extraction-pipeline`; the scalar-bearing values
+are that output after the planned GNN assignment stage. Passing `()` for either
+scalar-bearing value returns `CompleteBlendPipelineResult Pending` after the
+structural stage. Passing `()` for enrichment artifacts runs through the colimit
+and returns `Blocked` at optimality. Supplying both external boundaries returns
+the complete `Evaluated` result.
+
+Run the executable integration contract with:
+
+```bash
+GENERALIZATION_LLM_MODE=off \
+GENERALIZATION_CACHE_MODE=on \
+petta a_quantale_theoretic_approach/tests/quantale_petta_complete_pipeline_smoke.metta
+```
+
+The fixture checks all three outcomes—`Pending`, `Blocked`, and `Evaluated`—and
+the evaluated example produces aggregate quantale degree `0.8`.
+
+The facade consumes the compact extractor result rather than invoking the
+extractor bootstrap internally. This is necessary today because PeTTa resolves
+the extractor's static KB imports relative to the extractor process directory,
+whereas the quantale/optimality modules resolve repository-root imports. The
+data contract is integrated and tested; making both bootstraps share one process
+requires first normalizing the extractor's static import paths.
