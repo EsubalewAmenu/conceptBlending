@@ -151,8 +151,76 @@ class TestMettaVEnrichedRuntime(unittest.TestCase):
             for line in completed.stdout.splitlines()
             if line.strip().lower() in {"true", "false"}
         ]
-        # One True is emitted by import!, followed by thirteen contract results.
-        self.assertEqual(results, ["true"] * 14, completed.stdout)
+        # One True is emitted by import!, followed by thirty-one contract results.
+        self.assertEqual(results, ["true"] * 32, completed.stdout)
+
+
+class TestMettaVitalRelationRuntime(unittest.TestCase):
+    """Execute the perspective-aware vital-relation contracts in PeTTa."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_vital_relation_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(
+            tests_dir, "quantale_petta_vital_relations_smoke.metta"
+        )
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa vital-relation contracts failed:\nSTDOUT:\n{completed.stdout}\n"
+            f"STDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        # One True is emitted by import!, followed by twenty contract results.
+        self.assertEqual(results, ["true"] * 21, completed.stdout)
+
+
+class TestMettaEnrichedOptimalityRuntime(unittest.TestCase):
+    """Execute all evidence-aware PeTTa optimality constraints."""
+
+    @unittest.skipUnless(shutil.which("petta"), "PeTTa executable is not installed")
+    def test_enriched_optimality_contracts(self):
+        tests_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(tests_dir))
+        fixture = os.path.join(
+            tests_dir, "quantale_petta_enriched_optimality_smoke.metta"
+        )
+
+        completed = subprocess.run(
+            ["petta", fixture],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        self.assertEqual(
+            completed.returncode,
+            0,
+            f"PeTTa enriched optimality contracts failed:\n"
+            f"STDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}",
+        )
+        results = [
+            line.strip().lower()
+            for line in completed.stdout.splitlines()
+            if line.strip().lower() in {"true", "false"}
+        ]
+        # One import result, followed by twenty-three contract results.
+        self.assertEqual(results, ["true"] * 24, completed.stdout)
 
 
 class TestMettaPerspectiveAwareVPredicateRuntime(unittest.TestCase):
