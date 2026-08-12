@@ -98,6 +98,10 @@ def provider_error():
     return _MODEL_ERROR or ""
 
 
+def provider_status():
+    return "error" if provider_error() else "ready"
+
+
 def embedding_similarity(property_a, property_b):
     vector_a = _real_embedding(property_a)
     vector_b = _real_embedding(property_b)

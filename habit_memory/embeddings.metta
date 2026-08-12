@@ -33,8 +33,11 @@
 (= (embedding-provider-error)
    (py-call (real_embeddings.provider_error)))
 
+(= (embedding-provider-status)
+   (py-call (real_embeddings.provider_status)))
+
 (= (print-embedding-provider)
-   (println! (Embedding Provider: (embedding-provider-name) Mode: (embedding-provider-mode) Error: (embedding-provider-error))))
+   (println! (Embedding Provider: (embedding-provider-name) Mode: (embedding-provider-mode) Status: (embedding-provider-status))))
 
 (= (real-embedding-similarity $property-a $property-b)
    (py-call (real_embeddings.embedding_similarity $property-a $property-b)))
