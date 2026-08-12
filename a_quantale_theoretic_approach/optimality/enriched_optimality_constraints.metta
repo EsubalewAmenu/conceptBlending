@@ -1,5 +1,4 @@
-!(import! &self a_quantale_theoretic_approach/optimality/vital_relations)
-!(import! &self a_quantale_theoretic_approach/core_representation/v_predicate)
+!(import! &self a_quantale_theoretic_approach/optimality/optimality_context)
 
 ; Evidence-aware PeTTa optimality constraints.
 ;
@@ -77,6 +76,36 @@
                   (q-constraint-blocked Topology $universe InvalidOrMissingBlendHoms))
               (q-constraint-blocked Topology $universe InvalidOrMissingSourceBHoms))
           (q-constraint-blocked Topology $universe InvalidOrMissingSourceAHoms))))
+
+(= (q-topology-transported-op
+      $transported-family-a $transported-family-b $blend-family)
+   (let $universe
+      (ve-category-universe (vr-family-category $blend-family))
+      (if (vr-family-valid $transported-family-a)
+          (if (vr-family-valid $transported-family-b)
+              (if (vr-family-valid $blend-family)
+                  (if (== (vr-family-relations $transported-family-a) ())
+                      (q-constraint-blocked Topology $universe MissingSourceARelations)
+                      (if (== (vr-family-relations $transported-family-b) ())
+                          (q-constraint-blocked Topology $universe MissingSourceBRelations)
+                          (if (== (vr-family-relations $blend-family) ())
+                              (q-constraint-blocked Topology $universe MissingBlendRelations)
+                              (let* (
+                                 ($score-a
+                                    (vr-transported-family-preservation-score
+                                       $transported-family-a $blend-family))
+                                 ($score-b
+                                    (vr-transported-family-preservation-score
+                                       $transported-family-b $blend-family))
+                                 ($score (q-meet $score-a $score-b)))
+                                 (q-constraint-evaluated
+                                    Topology $score
+                                    (CachedDoubleCoendPreservation
+                                       (SourceA $score-a)
+                                       (SourceB $score-b)))))))
+                  (q-constraint-blocked Topology $universe InvalidOrMissingBlendHoms))
+              (q-constraint-blocked Topology $universe InvalidTransportedSourceBHoms))
+          (q-constraint-blocked Topology $universe InvalidTransportedSourceAHoms))))
 
 ; Web correspondence input:
 ; (VitalRelationCorrespondence Name RelationA RelationB BlendRelation WeightQ)
@@ -170,6 +199,69 @@
                       (q-constraint-blocked Web $universe InvalidOrMissingBlendHoms))
                   (q-constraint-blocked Web $universe InvalidOrMissingSourceBHoms))
               (q-constraint-blocked Web $universe InvalidOrMissingSourceAHoms)))))
+
+(= (q-web-transported-fold
+      $correspondences $transported-relations-a $transported-relations-b
+      $blend-relations $universe)
+   (if (== $correspondences ())
+       (q-unit $universe)
+       (let* (
+          ($head (car-atom $correspondences))
+          ($tail (cdr-atom $correspondences))
+          ($relation-a
+             (vr-family-find
+                (q-web-correspondence-a $head)
+                $transported-relations-a))
+          ($relation-b
+             (vr-family-find
+                (q-web-correspondence-b $head)
+                $transported-relations-b))
+          ($blend-relation
+             (vr-family-find
+                (q-web-correspondence-blend $head) $blend-relations))
+          ($head-score
+             (if (== $relation-a ())
+                 (q-bottom)
+                 (if (== $relation-b ())
+                     (q-bottom)
+                     (if (== $blend-relation ())
+                         (q-bottom)
+                         (q-tensor
+                            (q-web-correspondence-weight $head)
+                            (q-meet
+                               (vr-transported-relation-preservation-score
+                                  $relation-a $blend-relation)
+                               (vr-transported-relation-preservation-score
+                                  $relation-b $blend-relation)))))))
+          ($tail-score
+             (q-web-transported-fold
+                $tail $transported-relations-a $transported-relations-b
+                $blend-relations $universe)))
+          (q-meet $head-score $tail-score))))
+
+(= (q-web-transported-op
+      $correspondences $transported-family-a $transported-family-b
+      $blend-family)
+   (let $universe
+      (ve-category-universe (vr-family-category $blend-family))
+      (if (== $correspondences ())
+          (q-constraint-blocked Web $universe MissingCrossSpaceCorrespondences)
+          (if (vr-family-valid $transported-family-a)
+              (if (vr-family-valid $transported-family-b)
+                  (if (vr-family-valid $blend-family)
+                      (q-constraint-evaluated
+                         Web
+                         (q-web-transported-fold
+                            $correspondences
+                            (vr-family-relations $transported-family-a)
+                            (vr-family-relations $transported-family-b)
+                            (vr-family-relations $blend-family)
+                            $universe)
+                         (CachedCrossSpaceCorrespondences
+                            $correspondences))
+                      (q-constraint-blocked Web $universe InvalidOrMissingBlendHoms))
+                  (q-constraint-blocked Web $universe InvalidTransportedSourceBHoms))
+              (q-constraint-blocked Web $universe InvalidTransportedSourceAHoms)))))
 
 ; Unpacking: explicit C -> A/B reconstruction morphisms. The score is the
 ; enriched equivalence of each source object and its reconstructed image.
@@ -496,8 +588,8 @@
                   (q-constraint-value $tightening)
                   (q-constraint-value $relevance)))))))
 
-; Complete evidence bundle consumed by q-enriched-optimality-evaluator.
-; Its fields are positional to keep matching deterministic in PeTTa.
+; Backward-compatible input spelling. It is normalized through the shared
+; context builder before any constraint runs.
 (= (q-enriched-optimality-evaluator
       (VOptimalityContext
          $candidate $vcolimit
@@ -506,20 +598,79 @@
          $generic-to-a $generic-to-b $map-a $map-b
          $blend-to-a $blend-to-b
          $property-evidence $relevance-evidence))
+   (q-enriched-optimality-evaluator
+      (VOptimalityInputs
+         $candidate $vcolimit
+         $source-family-a $source-family-b $blend-family
+         $correspondences
+         $generic-to-a $generic-to-b $map-a $map-b
+         $blend-to-a $blend-to-b
+         $property-evidence $relevance-evidence)))
+
+(= (q-enriched-optimality-evaluator
+      (VOptimalityInputs
+         $candidate $vcolimit
+         $source-family-a $source-family-b $blend-family
+         $correspondences
+         $generic-to-a $generic-to-b $map-a $map-b
+         $blend-to-a $blend-to-b
+         $property-evidence $relevance-evidence))
+   (q-evaluate-built-optimality-context
+      (q-build-optimality-context
+         (VOptimalityInputs
+            $candidate $vcolimit
+            $source-family-a $source-family-b $blend-family
+            $correspondences
+            $generic-to-a $generic-to-b $map-a $map-b
+            $blend-to-a $blend-to-b
+            $property-evidence $relevance-evidence))))
+
+(= (q-evaluate-built-optimality-context
+      (VOptimalityContextError $reason))
+   (VOptimalityResult Blocked
+      ((VConstraintResult
+          Context Blocked (q-bottom)
+          (InvalidOptimalityContext $reason)))
+      (q-bottom)))
+
+(= (q-evaluate-built-optimality-context
+      (VSharedOptimalityContext
+         $perspective $universe $candidate $vcolimit
+         $source-family-a $source-family-b $blend-family
+         $transported-family-a $transported-family-b
+         $correspondences
+         $generic-to-a $generic-to-b $map-a $map-b
+         $blend-to-a $blend-to-b
+         $property-evidence $relevance-evidence))
+   (q-enriched-optimality-evaluator
+      (VSharedOptimalityContext
+         $perspective $universe $candidate $vcolimit
+         $source-family-a $source-family-b $blend-family
+         $transported-family-a $transported-family-b
+         $correspondences
+         $generic-to-a $generic-to-b $map-a $map-b
+         $blend-to-a $blend-to-b
+         $property-evidence $relevance-evidence)))
+
+(= (q-enriched-optimality-evaluator
+      (VSharedOptimalityContext
+         $perspective $universe $candidate $vcolimit
+         $source-family-a $source-family-b $blend-family
+         $transported-family-a $transported-family-b
+         $correspondences
+         $generic-to-a $generic-to-b $map-a $map-b
+         $blend-to-a $blend-to-b
+         $property-evidence $relevance-evidence))
    (let* (
-      ($universe
-         (ve-category-universe (vr-family-category $blend-family)))
       ($integration
          (q-vcolimit-integration-op $vcolimit $universe))
       ($topology
-         (q-topology-op
-            $source-family-a $source-family-b $blend-family
-            $map-a $map-b))
+         (q-topology-transported-op
+            $transported-family-a $transported-family-b $blend-family))
       ($web
-         (q-web-op
+         (q-web-transported-op
             $correspondences
-            $source-family-a $source-family-b $blend-family
-            $map-a $map-b))
+            $transported-family-a $transported-family-b $blend-family))
       ($unpacking
          (q-unpacking-op
             $map-a $blend-to-a $map-b $blend-to-b $universe))

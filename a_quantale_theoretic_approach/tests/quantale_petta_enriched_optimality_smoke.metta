@@ -99,6 +99,26 @@
       (OptBackA) (OptBackB)
       (OptPropertyEvidence) (OptRelevanceEvidence)))
 
+(= (CompleteInputs)
+   (VOptimalityInputs
+      (OptCandidate) (OptVColimit)
+      (FamilyA) (FamilyB) (FamilyC)
+      (OptCorrespondences)
+      (OptSigmaA) (OptSigmaB) (OptInA) (OptInB)
+      (OptBackA) (OptBackB)
+      (OptPropertyEvidence) (OptRelevanceEvidence)))
+
+(= (WrongOptSigmaA)
+   (VMorphism WrongOptSigmaA (OptG) (OptB) ((g b))))
+(= (WrongGenericTargetInputs)
+   (VOptimalityInputs
+      (OptCandidate) (OptVColimit)
+      (FamilyA) (FamilyB) (FamilyC)
+      (OptCorrespondences)
+      (WrongOptSigmaA) (OptSigmaB) (OptInA) (OptInB)
+      (OptBackA) (OptBackB)
+      (OptPropertyEvidence) (OptRelevanceEvidence)))
+
 ; All queries must evaluate to True.
 !(== (q-constraint-status
        (q-vcolimit-integration-op (OptVColimit) (W)))
@@ -206,4 +226,29 @@
           (if (> $degree 0.399)
               (< $degree 0.401)
               False))
+       False))
+!(q-context-valid (q-build-optimality-context (CompleteInputs)))
+!(let $transported
+      (q-context-transported-family-a
+         (q-build-optimality-context (CompleteInputs)))
+   (== (q-degree
+          (vr-value
+             (vr-family-find R (vr-family-relations $transported))
+             c c))
+       0.8))
+!(== (q-build-optimality-context (WrongGenericTargetInputs))
+     (VOptimalityContextError GenericToATargetMismatch))
+!(let (VOptimalityResult $status $results $value)
+      (q-enriched-optimality-evaluator (WrongGenericTargetInputs))
+   (if (== $status Blocked)
+       (== (q-degree $value) 0.0)
+       False))
+!(let* (
+   ($shared (q-build-optimality-context (CompleteInputs)))
+   ((VOptimalityResult $raw-status $raw-results $raw-value)
+      (q-enriched-optimality-evaluator (CompleteInputs)))
+   ((VOptimalityResult $shared-status $shared-results $shared-value)
+      (q-enriched-optimality-evaluator $shared)))
+   (if (== $raw-status $shared-status)
+       (== $raw-value $shared-value)
        False))

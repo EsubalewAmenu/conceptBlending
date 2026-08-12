@@ -227,6 +227,80 @@
               (VError InvalidBlendVitalRelation))
           $transported)))
 
+; Compare an already transported relation with its blend counterpart. Shared
+; contexts use this form so Topology and Web reuse one double-coend result.
+(= (vr-transported-relation-preservation-score
+      $transported-relation $blend-relation)
+   (if (vr-valid $transported-relation)
+       (if (vr-valid $blend-relation)
+           (if (== (vr-name $transported-relation)
+                   (vr-name $blend-relation))
+               (if (== (vr-perspective $transported-relation)
+                       (vr-perspective $blend-relation))
+                   (if (== (vr-source-category $transported-relation)
+                           (vr-source-category $blend-relation))
+                       (let* (
+                          ($category
+                             (vr-source-category $transported-relation))
+                          ($objects (ve-category-objects $category))
+                          ($universe (ve-category-universe $category)))
+                          (vr-profunctor-preservation-score
+                             $objects $objects
+                             (vr-profunctor $transported-relation)
+                             (vr-profunctor $blend-relation)
+                             $universe))
+                       (VError TransportedRelationCategoryMismatch))
+                   (VError RelationPerspectiveMismatch))
+               (VError RelationNameMismatch))
+           (VError InvalidBlendVitalRelation))
+       (VError InvalidTransportedVitalRelation)))
+
+(= (vr-transported-family-preservation-fold
+      $transported-relations $blend-relations $universe)
+   (if (== $transported-relations ())
+       (q-unit $universe)
+       (let* (
+          ($transported-relation (car-atom $transported-relations))
+          ($tail (cdr-atom $transported-relations))
+          ($blend-relation
+             (vr-family-find
+                (vr-name $transported-relation) $blend-relations))
+          ($head-score
+             (if (== $blend-relation ())
+                 (q-bottom)
+                 (vr-transported-relation-preservation-score
+                    $transported-relation $blend-relation)))
+          ($tail-score
+             (vr-transported-family-preservation-fold
+                $tail $blend-relations $universe)))
+          (q-meet $head-score $tail-score))))
+
+(= (vr-transported-family-preservation-score
+      (VitalRelationFamily
+         $perspective $category $transported-relations)
+      (VitalRelationFamily
+         $blend-perspective $blend-category $blend-relations))
+   (if (== $transported-relations ())
+       (VError MissingTransportedVitalRelations)
+       (if (== $blend-relations ())
+           (VError MissingBlendVitalRelations)
+           (if (vr-family-valid
+                  (VitalRelationFamily
+                     $perspective $category $transported-relations))
+               (if (vr-family-valid
+                      (VitalRelationFamily
+                         $blend-perspective $blend-category
+                         $blend-relations))
+                   (if (== $perspective $blend-perspective)
+                       (if (== $category $blend-category)
+                           (vr-transported-family-preservation-fold
+                              $transported-relations $blend-relations
+                              (ve-category-universe $blend-category))
+                           (VError TransportedRelationFamilyCategoryMismatch))
+                       (VError RelationFamilyPerspectiveMismatch))
+                   (VError InvalidBlendVitalRelationFamily))
+               (VError InvalidTransportedVitalRelationFamily)))))
+
 (= (vr-family-preservation-fold
       $source-relations $blend-relations $source-to-blend $universe)
    (if (== $source-relations ())
