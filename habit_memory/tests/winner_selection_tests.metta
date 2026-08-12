@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 !(let $import-scoring (import! &self ../peircean_scoring) (empty))
 !(let $import-step-3 (import! &self ../past_history_strengths) (empty))
@@ -30,7 +31,7 @@
           (register-successful-blend (seed-memory-for-test) (climbing intelligence agility tools))
           climbing
           intelligence)
-       0.0625)
+       0.21114934624350545)
 
 !(test (select-and-reinforce-winner-runtime
           (seed-memory-for-test)

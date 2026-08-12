@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 
 !(test (new-habit-memory) (habit-memory ()))
@@ -31,7 +32,7 @@
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))
           climbing
           intelligence)
-       0.0625)
+       0.21114934624350545)
 
 !(test (reinforce-nondominated-blends
           (new-habit-memory)
@@ -45,4 +46,4 @@
           (apply-habit-decay (memory-from-imported-history) 0.9)
           intelligence
           tools)
-       0.7216618975206501)
+       0.8111886797823962)
