@@ -2,9 +2,17 @@
 
 ; Quantale OP constraints over property-level V-predicate colimits.
 ;
-; This PeTTa pass intentionally does not perform WorldSpec colimits yet.
-; Relation-heavy OPs return neutral unit values unless a later relation layer is
-; supplied.
+; The five-argument legacy evaluator cannot supply enriched categories,
+; VColimit certificates, vital relations, or reconstruction maps. Those fields
+; are now reported as Pending/Blocked instead of receiving neutral unit values.
+; Use q-enriched-optimality-evaluator for the complete evidence-aware path.
+
+(= (q-legacy-constraint-evaluated $name $value $evidence)
+   (VConstraintResult $name Evaluated $value $evidence))
+(= (q-legacy-constraint-blocked $name $universe $reason)
+   (VConstraintResult $name Blocked (Q () 0.0) $reason))
+(= (q-legacy-constraint-pending $name $universe $reason)
+   (VConstraintResult $name Pending (Q () 0.0) $reason))
 
 (= (q-op-universe $candidate $canonical)
    (unique-atom (union-atom (v-world-universe $candidate)
@@ -21,22 +29,34 @@
           ($universe (q-op-universe $candidate $canonical)))
       (q-hom-properties $candidate-properties $canonical-properties $universe)))
 
-; Unpacking: in the property-only phase, unpacking is candidate-to-canonical
-; traceability. Later this can be strengthened with explicit C->A and C->B
-; split maps.
 (= (q-unpacking-op $candidate $canonical)
-   (q-good-reason-op $candidate $canonical))
+   (q-legacy-constraint-blocked
+      Unpacking (q-op-universe $candidate $canonical)
+      MissingBlendToSourceReconstructions))
 
 (= (q-topology-op $candidate $concept-a $concept-b)
-   (q-unit (unique-atom (union-atom (v-world-universe $candidate)
-                                    (union-atom (v-world-universe $concept-a)
-                                                (v-world-universe $concept-b))))))
+   (q-legacy-constraint-blocked
+      Topology
+      (unique-atom (union-atom (v-world-universe $candidate)
+                               (union-atom (v-world-universe $concept-a)
+                                           (v-world-universe $concept-b))))
+      MissingVitalRelationFamilies))
 
 (= (q-web-op $candidate $concept-a $concept-b)
-   (q-topology-op $candidate $concept-a $concept-b))
+   (q-legacy-constraint-blocked
+      Web
+      (unique-atom (union-atom (v-world-universe $candidate)
+                               (union-atom (v-world-universe $concept-a)
+                                           (v-world-universe $concept-b))))
+      MissingCrossSpaceCorrespondences))
 
 (= (q-metonymic-tightening-op $candidate $concept-a $concept-b)
-   (q-topology-op $candidate $concept-a $concept-b))
+   (q-legacy-constraint-blocked
+      MetonymicTightening
+      (unique-atom (union-atom (v-world-universe $candidate)
+                               (union-atom (v-world-universe $concept-a)
+                                           (v-world-universe $concept-b))))
+      MissingGenericMediatedRelationPaths))
 
 (= (q-weight-for-property $prop-name $weights)
    (if (== $weights ())
@@ -78,24 +98,39 @@
 
 (= (q-op-evaluater $candidate $concept-a $concept-b $mappings $relevance-weights)
    (let* (($canonical (q-vpredicate-colimit QuantaleCanonicalBlend $concept-a $concept-b $mappings))
-          ($integration (q-integration-op $candidate $canonical))
+          ($universe (q-op-universe $candidate $canonical))
+          ($integration
+             (q-legacy-constraint-pending
+                Integration $universe
+                (RequiresVColimitCertificate
+                   (LegacyPropertyScore
+                      (q-integration-op $candidate $canonical)))))
           ($topology (q-topology-op $candidate $concept-a $concept-b))
           ($web (q-web-op $candidate $concept-a $concept-b))
           ($unpacking (q-unpacking-op $candidate $canonical))
-          ($good-reason (q-good-reason-op $candidate $canonical))
+          ($good-reason
+             (q-legacy-constraint-evaluated
+                GoodReason
+                (q-good-reason-op $candidate $canonical)
+                LegacyCanonicalPropertySupport))
           ($tightening (q-metonymic-tightening-op $candidate $concept-a $concept-b))
-          ($relevance (q-relevance-op $candidate $relevance-weights))
-          ($opt (q-opt-product $integration $topology $web $unpacking $good-reason $tightening $relevance)))
+          ($relevance
+             (if (== $relevance-weights ())
+                 (q-legacy-constraint-blocked
+                    Relevance $universe MissingRelevanceEvidence)
+                 (q-legacy-constraint-evaluated
+                    Relevance
+                    (q-relevance-op $candidate $relevance-weights)
+                    LegacyPropertyWeights)))
+          ($results
+             ($integration $topology $web $unpacking
+              $good-reason $tightening $relevance)))
       (QuantaleOPResult
+         (Status Blocked)
          (Canonical $canonical)
-         (Integration $integration (q-degree $integration))
-         (Topology $topology (q-degree $topology))
-         (Web $web (q-degree $web))
-         (Unpacking $unpacking (q-degree $unpacking))
-         (GoodReason $good-reason (q-degree $good-reason))
-         (MetonymicTightening $tightening (q-degree $tightening))
-         (Relevance $relevance (q-degree $relevance))
-         (Opt $opt (q-degree $opt)))))
+         $integration $topology $web $unpacking
+         $good-reason $tightening $relevance
+         (Opt (q-bottom) 0.0))))
 
 (= (q-op-evaluator $candidate $concept-a $concept-b $mappings $relevance-weights)
    (q-op-evaluater $candidate $concept-a $concept-b $mappings $relevance-weights))
