@@ -27,6 +27,12 @@
        0.0)
 !(test (habit-strength-pmi (decayed-habit-memory 0.5 (habit-memory ((a b) (a b) (a c) (d e)))) a b)
        0.20751874963942185)
+!(test (normalize-positive-pmi 1.0)
+       0.5)
+!(test (combine-weighted-habit-strengths 0.6 1.0 0.3 0.4 0.3 0.3)
+       0.48)
+!(test (combine-weighted-habit-strengths 0.6 1.0 0.3 0.0 0.0 0.0)
+       0.0)
 
 !(test (get-habit-strength
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))

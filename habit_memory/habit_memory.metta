@@ -114,11 +114,37 @@
        0.0
        (/ $pmi-score (+ 1 $pmi-score))))
 
+(= (habit-strength-jaccard-weight)
+   1.0)
+(= (habit-strength-pmi-weight)
+   1.0)
+(= (habit-strength-embedding-weight)
+   1.0)
+
+(= (combine-weighted-habit-strengths
+      $jaccard-score
+      $pmi-score
+      $embedding-score
+      $jaccard-weight
+      $pmi-weight
+      $embedding-weight)
+   (let $weight-total (+ $jaccard-weight
+                         (+ $pmi-weight $embedding-weight))
+        (if (<= $weight-total 0)
+            0.0
+            (/ (+ (* $jaccard-weight $jaccard-score)
+                  (+ (* $pmi-weight (normalize-positive-pmi $pmi-score))
+                     (* $embedding-weight $embedding-score)))
+               $weight-total))))
+
 (= (combine-habit-strengths $jaccard-score $pmi-score $embedding-score)
-   (/ (+ $jaccard-score
-         (+ (normalize-positive-pmi $pmi-score)
-            $embedding-score))
-      3))
+   (combine-weighted-habit-strengths
+      $jaccard-score
+      $pmi-score
+      $embedding-score
+      (habit-strength-jaccard-weight)
+      (habit-strength-pmi-weight)
+      (habit-strength-embedding-weight)))
 
 (= (property-count (decayed-habit-memory $gamma $memory) $property)
    (property-count $memory $property))
