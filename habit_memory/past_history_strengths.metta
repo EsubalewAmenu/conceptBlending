@@ -42,6 +42,7 @@
 
 (= (check-past-history-strengths $memory $concept-1 $concept-2)
    (let* (($step-3 (println! (--- STEP 3: Automated Past History Cross-Examination ---)))
+          ($weights (print-habit-strength-weights))
           ($explain (println! (Scanning every property in Concept 1 against every property in Concept 2)))
           ($cross (print-cross-connections $memory $concept-1 $concept-2))
           ($notice (if (cross-connections-found $memory $concept-1 $concept-2)

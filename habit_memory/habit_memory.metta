@@ -124,6 +124,15 @@
 (= (habit-strength-embedding-weight)
    0.3)
 
+(= (habit-strength-weights)
+   (weights
+      (Jaccard (habit-strength-jaccard-weight))
+      (PMI (habit-strength-pmi-weight))
+      (Embedding (habit-strength-embedding-weight))))
+
+(= (print-habit-strength-weights)
+   (println! (Active M_P Weights: (habit-strength-weights))))
+
 (= (combine-weighted-habit-strengths
       $jaccard-score
       $pmi-score
