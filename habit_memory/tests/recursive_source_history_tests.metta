@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-real-embeddings (import! &self "../real_embeddings.py") (empty))
 !(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 
@@ -25,7 +26,7 @@
        (p1 p2 p3 p4 p5 p6))
 
 !(test (get-habit-strength (memory-from-imported-history) p1 p6)
-       0.616317116304661)
+       0.8079999671446233)
 
 !(test (property-count (memory-from-imported-history) p1)
        2)

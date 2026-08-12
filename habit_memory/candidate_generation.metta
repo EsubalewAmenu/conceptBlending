@@ -122,6 +122,7 @@
 (= (generate-and-evaluate-candidates $memory $concept-1 $concept-2)
    (let* (($step-4 (println! (--- STEP 4: Algorithmic Candidate Generation & Evaluation ---)))
           ($weights (print-habit-strength-weights))
+          ($provider (print-embedding-provider))
           ($sorted-c1 (msort $concept-1))
           ($sorted-c2 (msort $concept-2))
           ($show-sort-1 (println! (Sorted Concept 1 Properties: $sorted-c1)))

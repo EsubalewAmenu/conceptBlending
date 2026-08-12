@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-real-embeddings (import! &self "../real_embeddings.py") (empty))
 !(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 !(let $import-scoring (import! &self ../peircean_scoring) (empty))
@@ -25,18 +26,18 @@
         (webs walking)))
 
 !(test (best-core-blend (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
-       (climbing intelligence))
+       (webs intelligence))
 
-!(test (discover-extensions (memory-from-imported-history) (climbing intelligence))
-       (agility balance vertical ropes tools language strategy engineering logic))
+!(test (discover-extensions (memory-from-imported-history) (webs intelligence))
+       (insects sticky tools))
 
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence))
-       0.1525344116191549)
+       0.07822914109067729)
 !(test (habit-bonus (memory-from-imported-history) (climbing intelligence agility tools))
-       2.4667964100761477)
+       1.759159182538904)
 
 !(test (candidate-generation-result (memory-from-imported-history) (climbing webs venomous) (intelligence tools walking))
-       (candidate-result (climbing intelligence) 0.1525344116191549 (climbing intelligence agility balance vertical ropes tools language strategy engineering logic) 17.938012007933867))
+       (candidate-result (webs intelligence) 0.10184501150620233 (webs intelligence insects sticky tools) 3.3700673148201883))
 
 !(test (candidate-generation-result (memory-from-imported-history) (alpha beta) (gamma delta))
-       (candidate-result (alpha delta) 0.0 (alpha delta) 0.0))
+       (candidate-result (alpha gamma) 0.14500242570026217 (alpha gamma) 0.14500242570026217))

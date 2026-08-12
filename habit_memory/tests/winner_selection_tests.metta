@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-real-embeddings (import! &self "../real_embeddings.py") (empty))
 !(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 !(let $import-scoring (import! &self ../peircean_scoring) (empty))
@@ -28,10 +29,10 @@
        (habit-memory ((a b c) (x y))))
 
 !(test (get-habit-strength
-          (register-successful-blend (seed-memory-for-test) (climbing intelligence agility tools))
-          climbing
-          intelligence)
-       0.20253441161915492)
+       (register-successful-blend (seed-memory-for-test) (climbing intelligence agility tools))
+       climbing
+       intelligence)
+       0.1282291410906773)
 
 !(test (select-and-reinforce-winner-runtime
           (seed-memory-for-test)

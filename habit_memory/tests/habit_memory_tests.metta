@@ -1,6 +1,7 @@
 (= (hide $value) (empty))
 
 !(let $import-memory (import! &self ../memory) (empty))
+!(let $import-real-embeddings (import! &self "../real_embeddings.py") (empty))
 !(let $import-embeddings (import! &self ../embeddings) (empty))
 !(let $import-habit-memory (import! &self ../habit_memory) (empty))
 
@@ -38,7 +39,7 @@
           (reinforce-selected-blend (memory-from-imported-history) (climbing intelligence agility tools))
           climbing
           intelligence)
-       0.20253441161915492)
+       0.1282291410906773)
 
 !(test (reinforce-nondominated-blends
           (new-habit-memory)
@@ -52,4 +53,4 @@
           (apply-habit-decay (memory-from-imported-history) 0.9)
           intelligence
           tools)
-       0.8200698118041565)
+       0.6218697250714571)
